@@ -1676,6 +1676,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-plugin-simple-import-sort@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "eslint-plugin-simple-import-sort@npm:7.0.0"
+  peerDependencies:
+    eslint: ">=5.0.0"
+  checksum: 6aacb7179c213cd2081950630368d1f3b1dcb4f5674d8b989fe7839e7b317ee521d74761676e8b1a7cab49f20405dbcc9aac05358ae804e6bcba6cbf1daccb3d
+  languageName: node
+  linkType: hard
+
 "eslint-scope@npm:^5.1.1":
   version: 5.1.1
   resolution: "eslint-scope@npm:5.1.1"
@@ -4577,6 +4586,7 @@ __metadata:
     "@types/react": 17.0.36
     eslint: 7
     eslint-config-next: 12.0.4
+    eslint-plugin-simple-import-sort: ^7.0.0
     gl-matrix: ^3.4.3
     next: 12.0.4
     react: 17.0.2
