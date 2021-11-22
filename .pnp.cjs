@@ -39,6 +39,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/react", "npm:17.0.36"],
             ["eslint", "npm:7.32.0"],
             ["eslint-config-next", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:12.0.4"],
+            ["gl-matrix", "npm:3.4.3"],
             ["next", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:12.0.4"],
             ["react", "npm:17.0.2"],
             ["react-dom", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:17.0.2"],
@@ -2541,6 +2542,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["get-symbol-description", "npm:1.0.0"],
             ["call-bind", "npm:1.0.2"],
             ["get-intrinsic", "npm:1.1.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["gl-matrix", [
+        ["npm:3.4.3", {
+          "packageLocation": "./.yarn/cache/gl-matrix-npm-3.4.3-f2e6349faa-c47830ba72.zip/node_modules/gl-matrix/",
+          "packageDependencies": [
+            ["gl-matrix", "npm:3.4.3"]
           ],
           "linkType": "HARD",
         }]
@@ -5367,6 +5377,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/react", "npm:17.0.36"],
             ["eslint", "npm:7.32.0"],
             ["eslint-config-next", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:12.0.4"],
+            ["gl-matrix", "npm:3.4.3"],
             ["next", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:12.0.4"],
             ["react", "npm:17.0.2"],
             ["react-dom", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:17.0.2"],

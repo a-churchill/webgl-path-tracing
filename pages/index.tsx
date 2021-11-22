@@ -20,7 +20,7 @@ const Home: NextPage = () => {
         <h1 className={styles.title}>Path Tracing</h1>
 
         <p className={styles.description}>
-          Path tracing algorithm for global illumination implemented in WebGL
+          Path tracing algorithm for global illumination implemented in WebGL.
         </p>
 
         <Canvas />
