@@ -2,28 +2,27 @@ import { mat4 } from "gl-matrix";
 import { useEffect, useRef } from "react";
 import { ProgramInfo } from "../../types/ProgramInfo";
 import { WebGLError } from "../../utils/errors";
-
-/** A program in GLSL we will load into the WebGL context */
-type GLSLProgramSource = string;
+import vsSource from "../../shaders/simple-vertex-shader.glsl";
+import fsSource from "../../shaders/simple-fragment-shader.glsl";
 
 const CANVAS_ID = "webgl-canvas";
 
-const vsSource: GLSLProgramSource = `
-  attribute vec4 vertexPosition;
+// const vsSource: GLSLProgramSource = `
+//   attribute vec4 vertexPosition;
 
-  uniform mat4 modelViewMatrix;
-  uniform mat4 projectionMatrix;
+//   uniform mat4 modelViewMatrix;
+//   uniform mat4 projectionMatrix;
 
-  void main() {
-    gl_Position = projectionMatrix * modelViewMatrix * vertexPosition;
-  }
-`;
+//   void main() {
+//     gl_Position = projectionMatrix * modelViewMatrix * vertexPosition;
+//   }
+// `;
 
-const fsSource: GLSLProgramSource = `
-  void main() {
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-  }
-`;
+// const fsSource: GLSLProgramSource = `
+//   void main() {
+//     gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+//   }
+// `;
 
 /**
  * Initializes the shader program.
@@ -202,7 +201,6 @@ function drawScene(gl: WebGLRenderingContext) {
   /** Set to 0 to compute directly from `type` and `numComponents` */
   const stride = 0;
   const offset = 0;
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
   gl.vertexAttribPointer(
     programInfo.attribLocations.vertexPosition,
     numComponents,

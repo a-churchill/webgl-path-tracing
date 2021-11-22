@@ -43,7 +43,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["next", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:12.0.4"],
             ["react", "npm:17.0.2"],
             ["react-dom", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:17.0.2"],
-            ["typescript", "patch:typescript@npm%3A4.4.3#~builtin<compat/typescript>::version=4.4.3&hash=493e53"]
+            ["typescript", "patch:typescript@npm%3A4.4.3#~builtin<compat/typescript>::version=4.4.3&hash=493e53"],
+            ["webpack-glsl-loader", "npm:1.0.1"]
           ],
           "linkType": "SOFT",
         }]
@@ -2449,6 +2450,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["fs", [
+        ["npm:0.0.2", {
+          "packageLocation": "./.yarn/cache/fs-npm-0.0.2-bba8c78dbd-3880da7d41.zip/node_modules/fs/",
+          "packageDependencies": [
+            ["fs", "npm:0.0.2"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["fs-minipass", [
         ["npm:2.1.0", {
           "packageLocation": "./.yarn/cache/fs-minipass-npm-2.1.0-501ef87306-1b8d128dae.zip/node_modules/fs-minipass/",
@@ -4051,6 +4061,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["path", [
+        ["npm:0.11.14", {
+          "packageLocation": "./.yarn/cache/path-npm-0.11.14-d10ae3e5e5-ba41aad7bd.zip/node_modules/path/",
+          "packageDependencies": [
+            ["path", "npm:0.11.14"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["path-browserify", [
         ["npm:1.0.1", {
           "packageLocation": "./.yarn/cache/path-browserify-npm-1.0.1-f975d99a99-c6d7fa3764.zip/node_modules/path-browserify/",
@@ -5381,7 +5400,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["next", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:12.0.4"],
             ["react", "npm:17.0.2"],
             ["react-dom", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:17.0.2"],
-            ["typescript", "patch:typescript@npm%3A4.4.3#~builtin<compat/typescript>::version=4.4.3&hash=493e53"]
+            ["typescript", "patch:typescript@npm%3A4.4.3#~builtin<compat/typescript>::version=4.4.3&hash=493e53"],
+            ["webpack-glsl-loader", "npm:1.0.1"]
           ],
           "linkType": "SOFT",
         }]
@@ -5391,6 +5411,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/webidl-conversions-npm-4.0.2-1d159e6409-c93d8dfe90.zip/node_modules/webidl-conversions/",
           "packageDependencies": [
             ["webidl-conversions", "npm:4.0.2"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["webpack-glsl-loader", [
+        ["npm:1.0.1", {
+          "packageLocation": "./.yarn/cache/webpack-glsl-loader-npm-1.0.1-34e456fb1a-71bf172351.zip/node_modules/webpack-glsl-loader/",
+          "packageDependencies": [
+            ["webpack-glsl-loader", "npm:1.0.1"],
+            ["fs", "npm:0.0.2"],
+            ["path", "npm:0.11.14"]
           ],
           "linkType": "HARD",
         }]
