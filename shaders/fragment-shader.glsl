@@ -59,7 +59,7 @@ Ray generateRay(vec2 position) {
 }
 
 HitRecord intersectRayWithPrimitive(Ray ray, Plane plane, HitRecord hit) {
-  float time = (plane.d + dot(plane.normal, ray.origin)) / dot(plane.normal, ray.direction);
+  float time = (plane.d - dot(plane.normal, ray.origin)) / dot(plane.normal, ray.direction);
   if(MIN_TIME < time && time < hit.time) {
     hit.time = time;
     hit.normal = plane.normal;
@@ -69,10 +69,12 @@ HitRecord intersectRayWithPrimitive(Ray ray, Plane plane, HitRecord hit) {
 }
 
 HitRecord intersectRayWithPrimitive(Ray ray, Sphere sphere, HitRecord hit) {
+  // put sphere at center
   ray.origin = ray.origin - sphere.center;
-  float a = length(ray.direction);
+
+  float a = dot(ray.direction, ray.direction);
   float b = 2.0 * dot(ray.direction, ray.origin);
-  float c = length(ray.origin) - (sphere.radius * sphere.radius);
+  float c = dot(ray.origin, ray.origin) - (sphere.radius * sphere.radius);
 
   float d = (b * b) - (4.0 * a * c);
   if(d < 0.0) {
@@ -87,6 +89,8 @@ HitRecord intersectRayWithPrimitive(Ray ray, Sphere sphere, HitRecord hit) {
   }
   float t = t_minus < MIN_TIME ? t_plus : t_minus;
 
+  // remove sphere from center
+  ray.origin = ray.origin + sphere.center;
   if(t < hit.time) {
     hit.time = t;
     hit.normal = normalize(ray.origin + (t * ray.direction));

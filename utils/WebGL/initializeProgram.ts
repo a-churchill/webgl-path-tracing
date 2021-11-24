@@ -211,7 +211,7 @@ export default function initializeProgram(
     const shaderProgram = initializeShaderProgram(gl, vsSource, fsSource);
 
     const camera = Camera(
-      vec3.fromValues(0, 0, -CAMERA_DISTANCE),
+      vec3.fromValues(0, 0, CAMERA_DISTANCE),
       vec3.fromValues(0, 0, -1),
       Math.PI / 4,
       vec3.fromValues(0, 1, 0)
@@ -223,7 +223,7 @@ export default function initializeProgram(
       Plane(vec3.fromValues(0, 1, 0), -1, WHITE), // floor
       Plane(vec3.fromValues(0, -1, 0), -1, WHITE), // ceiling
       Plane(vec3.fromValues(0, 0, 1), -1, GREEN), // back wall
-      Sphere(vec3.fromValues(0, -0.75, 0), 0.75, RED), // sphere on ground
+      Sphere(vec3.fromValues(0, -0.25, 0), 0.75, RED), // sphere on ground
     ];
 
     initializeVertices(gl, shaderProgram);
