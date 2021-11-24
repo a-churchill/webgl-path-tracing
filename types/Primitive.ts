@@ -32,7 +32,7 @@ export interface Plane {
 export function Plane(normal: vec3, d: number, color: vec3): Plane {
   return {
     type: PrimitiveType.Plane,
-    normal,
+    normal: vec3.normalize(vec3.create(), normal),
     d,
     color,
   };

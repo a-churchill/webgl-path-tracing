@@ -1,3 +1,5 @@
+import ProgramControls from "components/ProgramControls";
+import useMouseCameraControl from "hooks/useMouseCameraControl";
 import { useCallback, useEffect, useState } from "react";
 import { Program } from "types/Program";
 import { CANVAS_ID } from "utils/constants";
@@ -17,11 +19,14 @@ export default function Canvas() {
     setError(errorInfo);
   }, []);
 
-  const renderCallback = useCallback(() => {
-    if (program !== undefined) {
-      render(program, onErrorCallback);
-    }
-  }, [program, onErrorCallback]);
+  const renderCallback = useCallback(
+    (program: Program | undefined) => {
+      if (program !== undefined) {
+        render(program, onErrorCallback);
+      }
+    },
+    [onErrorCallback]
+  );
 
   // initialize program
   useEffect(() => {
@@ -31,23 +36,29 @@ export default function Canvas() {
   // render on change
   useEffect(() => {
     console.log("render program", program);
-    renderCallback();
-  }, [onErrorCallback, program, renderCallback]);
+    renderCallback(program);
+  }, [program, renderCallback]);
+
+  // allow moving camera around
+  const eventListeners = useMouseCameraControl(program, setProgram);
 
   useEffect(() => {
-    window.addEventListener("resize", renderCallback);
+    const listener = () => renderCallback(program);
+    window.addEventListener("resize", listener);
 
-    return () => window.removeEventListener("resize", renderCallback);
-  }, [renderCallback]);
+    return () => window.removeEventListener("resize", listener);
+  }, [program, renderCallback]);
 
   return (
     <>
       <canvas
+        {...eventListeners}
         id={CANVAS_ID}
         className={styles.canvas}
         width="480"
         height="480"
       />
+      <ProgramControls program={program} updateProgram={setProgram} />
       {error !== undefined && <div className={styles.error}>{error}</div>}
     </>
   );

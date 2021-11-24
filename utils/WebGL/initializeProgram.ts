@@ -2,7 +2,7 @@ import fsSource from "shaders/fragment-shader.glsl";
 import vsSource from "shaders/vertex-shader.glsl";
 
 import { mat4, vec3 } from "gl-matrix";
-import { Camera } from "types/Camera";
+import { Camera, DEFAULT_CAMERA } from "types/Camera";
 import { Light, Plane, Sphere } from "types/Primitive";
 import {
   Attributes,
@@ -210,27 +210,20 @@ export default function initializeProgram(
 
     const shaderProgram = initializeShaderProgram(gl, vsSource, fsSource);
 
-    const camera = Camera(
-      vec3.fromValues(0, 0, CAMERA_DISTANCE),
-      vec3.fromValues(0, 0, -1),
-      Math.PI / 4,
-      vec3.fromValues(0, 1, 0)
-    );
-
     const primitives = [
       Plane(vec3.fromValues(1, 0, 0), -1, RED), // left wall
       Plane(vec3.fromValues(-1, 0, 0), -1, BLUE), // right wall
       Plane(vec3.fromValues(0, 1, 0), -1, WHITE), // floor
       Plane(vec3.fromValues(0, -1, 0), -1, WHITE), // ceiling
       Plane(vec3.fromValues(0, 0, 1), -1, GREEN), // back wall
-      Sphere(vec3.fromValues(0, -0.5, 0.5), 0.5, RED), // sphere on ground
-      Light(vec3.fromValues(0.5, 0.5, 1.5), WHITE), // light in top right back corner
+      Sphere(vec3.fromValues(0, -0.75, 0.75), 0.25, RED), // sphere on ground
+      Light(vec3.fromValues(0.75, 0.75, 1.5), WHITE), // light in top right back corner
     ];
 
     initializeVertices(gl, shaderProgram);
 
     return {
-      camera,
+      camera: DEFAULT_CAMERA,
       gl,
       primitives,
       shaderProgram,

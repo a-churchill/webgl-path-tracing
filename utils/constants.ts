@@ -1,6 +1,6 @@
 import { vec3 } from "gl-matrix";
 
-export const CAMERA_DISTANCE = 5.0;
+export const CAMERA_DISTANCE = 3.41421356;
 export const CANVAS_ID = "webgl-canvas";
 export const MAX_LIGHTS = 5;
 export const MAX_PLANES = 5;

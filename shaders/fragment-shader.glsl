@@ -4,8 +4,11 @@ precision mediump float;
 const int MAX_LIGHTS = 5;
 const int MAX_PLANES = 5;
 const int MAX_SPHERES = 5;
+
 const float MIN_TIME = 0.1;
 const float MAX_TIME = 10000.0;
+
+const float PLANE_SIZE = 1.0;
 
 // TYPES
 struct Camera {
@@ -71,8 +74,19 @@ Ray generateRay(vec2 position) {
 }
 
 HitRecord intersectRayWithPrimitive(Ray ray, Plane plane, HitRecord hit) {
+  if(dot(plane.normal, ray.direction) > 0.0) {
+    // ignore plane if we're on the wrong side of it
+    return hit;
+  }
   float time = (plane.d - dot(plane.normal, ray.origin)) / dot(plane.normal, ray.direction);
   if(MIN_TIME < time && time < hit.time) {
+    vec3 pointOnPlane = rayAtTime(ray, time);
+    vec3 centerOfPlane = plane.normal * (plane.d / abs(plane.d)) * sqrt(abs(plane.d));
+    vec3 difference = pointOnPlane - centerOfPlane;
+    if(abs(difference.x) > PLANE_SIZE || abs(difference.y) > PLANE_SIZE || abs(difference.z) > PLANE_SIZE) {
+      return hit;
+    }
+
     hit.time = time;
     hit.normal = plane.normal;
     hit.color = plane.color;
