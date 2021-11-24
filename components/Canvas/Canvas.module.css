@@ -1,0 +1,9 @@
+.canvas {
+  width: 95vw;
+  max-width: 800px;
+}
+
+.error {
+  margin: 2rem;
+  color: #ff5555;
+}

@@ -52,7 +52,7 @@ export default function useMouseCameraControl(
       // set view matrix to inverse of camera matrix
       mat4.invert(viewMatrix.current, cameraMatrix);
 
-      requestAnimationFrame(render);
+      render();
     },
     [gl, viewMatrix, render]
   );
