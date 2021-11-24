@@ -3,7 +3,7 @@ import vsSource from "shaders/vertex-shader.glsl";
 
 import { mat4, vec3 } from "gl-matrix";
 import { Camera } from "types/Camera";
-import { Plane, Sphere } from "types/Primitive";
+import { Light, Plane, Sphere } from "types/Primitive";
 import {
   Attributes,
   Program,
@@ -223,7 +223,8 @@ export default function initializeProgram(
       Plane(vec3.fromValues(0, 1, 0), -1, WHITE), // floor
       Plane(vec3.fromValues(0, -1, 0), -1, WHITE), // ceiling
       Plane(vec3.fromValues(0, 0, 1), -1, GREEN), // back wall
-      Sphere(vec3.fromValues(0, -0.25, 0), 0.75, RED), // sphere on ground
+      Sphere(vec3.fromValues(0, -0.5, 0.5), 0.5, RED), // sphere on ground
+      Light(vec3.fromValues(0.5, 0.5, 1.5), WHITE), // light in top right back corner
     ];
 
     initializeVertices(gl, shaderProgram);

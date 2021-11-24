@@ -32,7 +32,6 @@ export default function Canvas() {
   useEffect(() => {
     console.log("render program", program);
     renderCallback();
-    setError(undefined);
   }, [onErrorCallback, program, renderCallback]);
 
   useEffect(() => {
@@ -46,7 +45,7 @@ export default function Canvas() {
       <canvas
         id={CANVAS_ID}
         className={styles.canvas}
-        width="640"
+        width="480"
         height="480"
       />
       {error !== undefined && <div className={styles.error}>{error}</div>}

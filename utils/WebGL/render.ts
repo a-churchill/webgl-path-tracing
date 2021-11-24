@@ -1,6 +1,6 @@
 import { PrimitiveType } from "types/Primitive";
 import { Program } from "types/Program";
-import { MAX_PLANES, MAX_SPHERES } from "utils/constants";
+import { MAX_LIGHTS, MAX_PLANES, MAX_SPHERES } from "utils/constants";
 import { unreachable, WebGLError } from "utils/errors";
 
 /**
@@ -23,11 +23,25 @@ function copyProgramStateToBuffers({
   gl.uniform1f(shaderProgram.uniformLocations["camera.fov"], camera.fov);
   gl.uniform3fv(shaderProgram.uniformLocations["camera.up"], camera.up);
 
-  let sphereIndex = 0;
+  let lightIndex = 0;
   let planeIndex = 0;
+  let sphereIndex = 0;
   for (const primitive of primitives) {
-    console.log("primitive", primitive);
     switch (primitive.type) {
+      case PrimitiveType.Light:
+        if (lightIndex >= MAX_LIGHTS) {
+          throw new WebGLError("Too many lights");
+        }
+        gl.uniform3fv(
+          shaderProgram.uniformLocations[`lights[${lightIndex}].origin`],
+          primitive.origin
+        );
+        gl.uniform3fv(
+          shaderProgram.uniformLocations[`lights[${lightIndex}].color`],
+          primitive.color
+        );
+        lightIndex++;
+        break;
       case PrimitiveType.Plane:
         if (planeIndex >= MAX_PLANES) {
           throw new WebGLError("Too many planes");
@@ -40,7 +54,7 @@ function copyProgramStateToBuffers({
           shaderProgram.uniformLocations[`planes[${planeIndex}].d`],
           primitive.d
         );
-        gl.uniform4fv(
+        gl.uniform3fv(
           shaderProgram.uniformLocations[`planes[${planeIndex}].color`],
           primitive.color
         );
@@ -58,7 +72,7 @@ function copyProgramStateToBuffers({
           shaderProgram.uniformLocations[`spheres[${sphereIndex}].radius`],
           primitive.radius
         );
-        gl.uniform4fv(
+        gl.uniform3fv(
           shaderProgram.uniformLocations[`spheres[${sphereIndex}].color`],
           primitive.color
         );

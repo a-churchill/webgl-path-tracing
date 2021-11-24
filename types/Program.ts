@@ -29,12 +29,14 @@ export const PROGRAM_ATTRIBUTES = ["vertexPosition"] as const;
 export type Attributes = WebGLLocations<typeof PROGRAM_ATTRIBUTES[number]>;
 
 type CameraUniformNames = `camera.${"center" | "direction" | "up" | "fov"}`;
+type LightUniformNames = `lights[${number}].${"origin" | "color"}`;
 type PlaneUniformNames = `planes[${number}].${"normal" | "d" | "color"}`;
 type SphereUniformNames = `spheres[${number}].${"center" | "radius" | "color"}`;
 
 /** Uniforms we need to define to give plane locations */
 export const PROGRAM_UNIFORMS: (
   | CameraUniformNames
+  | LightUniformNames
   | PlaneUniformNames
   | SphereUniformNames
 )[] = [
@@ -42,6 +44,17 @@ export const PROGRAM_UNIFORMS: (
   "camera.direction",
   "camera.fov",
   "camera.up",
+
+  "lights[0].origin",
+  "lights[0].color",
+  "lights[1].origin",
+  "lights[1].color",
+  "lights[2].origin",
+  "lights[2].color",
+  "lights[3].origin",
+  "lights[3].color",
+  "lights[4].origin",
+  "lights[4].color",
 
   "planes[0].normal",
   "planes[0].d",

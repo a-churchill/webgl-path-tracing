@@ -1,6 +1,7 @@
 precision mediump float;
 
 // CONSTANTS
+const int MAX_LIGHTS = 5;
 const int MAX_PLANES = 5;
 const int MAX_SPHERES = 5;
 const float MIN_TIME = 0.1;
@@ -17,7 +18,18 @@ struct Camera {
 struct HitRecord {
   float time;
   vec3 normal;
-  vec4 color;
+  vec3 color;
+};
+
+struct Light {
+  vec3 origin;
+  vec3 color;
+};
+
+struct Plane {
+  vec3 normal;
+  float d;
+  vec3 color;
 };
 
 struct Ray {
@@ -25,21 +37,16 @@ struct Ray {
   vec3 direction;
 };
 
-struct Plane {
-  vec3 normal;
-  float d;
-  vec4 color;
-};
-
 struct Sphere {
   vec3 center;
   float radius;
-  vec4 color;
+  vec3 color;
 };
 
 // INPUTS
 
 uniform Camera camera;
+uniform Light lights[MAX_LIGHTS];
 uniform Plane planes[MAX_PLANES];
 uniform Sphere spheres[MAX_SPHERES];
 
@@ -47,6 +54,11 @@ uniform Sphere spheres[MAX_SPHERES];
 varying vec2 position;
 
 // HELPER FUNCTIONS
+
+// Gets the position of the given ray at the given time, in world space
+vec3 rayAtTime(Ray ray, float time) {
+  return ray.origin + (time * ray.direction);
+}
 
 // Generates a ray from the camera to the given position in clip space ([-1, 1] x 
 // [-1, 1]).
@@ -90,10 +102,10 @@ HitRecord intersectRayWithPrimitive(Ray ray, Sphere sphere, HitRecord hit) {
   float t = t_minus < MIN_TIME ? t_plus : t_minus;
 
   // remove sphere from center
-  ray.origin = ray.origin + sphere.center;
+  // ray.origin = ray.origin + sphere.center;
   if(t < hit.time) {
     hit.time = t;
-    hit.normal = normalize(ray.origin + (t * ray.direction));
+    hit.normal = normalize(rayAtTime(ray, t));
     hit.color = sphere.color;
   }
   return hit;
@@ -103,7 +115,7 @@ HitRecord intersectRayWithPrimitive(Ray ray, Sphere sphere, HitRecord hit) {
 HitRecord intersectRay(Ray ray) {
   HitRecord hit;
   hit.time = MAX_TIME;
-  hit.color = vec4(0.0, 0.0, 0.0, 1.0);
+  hit.color = vec3(0.0, 0.0, 0.0);
 
   for(int i = 0; i < MAX_PLANES; i++) {
     hit = intersectRayWithPrimitive(ray, planes[i], hit);
@@ -116,15 +128,40 @@ HitRecord intersectRay(Ray ray) {
   return hit;
 }
 
+// Returns the color of the pixel based on all lights
+vec3 getLighting(Ray ray, HitRecord hit) {
+  vec3 result;
+
+  vec3 hitPos = rayAtTime(ray, hit.time);
+  for(int i = 0; i < MAX_LIGHTS; i++) {
+    // make sure we're not in shadow
+    vec3 dirToLight = normalize(lights[i].origin - hitPos);
+    float distToLight = distance(lights[i].origin, hitPos);
+    Ray rayToLight = Ray(hitPos + 0.001 * dirToLight, dirToLight);
+    HitRecord shadowHit = intersectRay(rayToLight);
+    if(shadowHit.time < MAX_TIME && distance(rayAtTime(rayToLight, shadowHit.time), hitPos) < distToLight) {
+      continue;
+    }
+
+    // confirmed not in shadow, add light's contribution to result
+    vec3 intensity = lights[i].color / (0.5 * distToLight * distToLight);
+    vec3 color = max(dot(dirToLight, hit.normal), 0.0) * intensity * hit.color;
+    result = result + color;
+  }
+  return result;
+}
+
 // MAIN FUNCTION
 
 void main() {
+  gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
   Ray ray = generateRay(position);
   HitRecord hit = intersectRay(ray);
 
-  if(hit.time < MAX_TIME) {
-    gl_FragColor = hit.color;
-  } else {
+  if(hit.time >= MAX_TIME) {
     gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    return;
   }
+
+  gl_FragColor = vec4(getLighting(ray, hit), 1.0);
 }
