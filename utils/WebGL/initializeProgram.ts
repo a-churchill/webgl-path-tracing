@@ -1,8 +1,8 @@
 import fsSource from "shaders/fragment-shader.glsl";
 import vsSource from "shaders/vertex-shader.glsl";
 
-import { mat4, vec3 } from "gl-matrix";
-import { Camera, DEFAULT_CAMERA } from "types/Camera";
+import { vec3 } from "gl-matrix";
+import { DEFAULT_CAMERA } from "types/Camera";
 import { Light, Plane, Sphere } from "types/Primitive";
 import {
   Attributes,
@@ -11,14 +11,7 @@ import {
   PROGRAM_UNIFORMS,
   Uniforms,
 } from "types/Program";
-import {
-  BLUE,
-  CAMERA_DISTANCE,
-  CANVAS_ID,
-  GREEN,
-  RED,
-  WHITE,
-} from "utils/constants";
+import { BLUE, CANVAS_ID, GREEN, RED, WHITE } from "utils/constants";
 import { WebGLError } from "utils/errors";
 
 /**
@@ -144,6 +137,31 @@ function initializeShaderProgram(
 }
 
 /**
+ * Initializes textures, loading images asynchronously if necessary
+ * @param gl webgl rendering context
+ * @returns texture objects
+ */
+function initializeTextures(gl: WebGLRenderingContext): WebGLTexture[] {
+  const texture = gl.createTexture();
+  if (texture === null) {
+    throw new WebGLError("Could not create texture");
+  }
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  const image = new Image();
+  image.src = "noise.png";
+  image.addEventListener("load", () => {
+    console.log("Loaded texture", image);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    // turn off mips and set wrapping to clamp to edge
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  });
+  return [texture];
+}
+
+/**
  * Creates a shader of the given type, uploads the source, and compiles it.
  *
  * Credit to [MDN tutorial](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Getting_started_with_WebGL).
@@ -216,17 +234,22 @@ export default function initializeProgram(
       Plane(vec3.fromValues(0, 1, 0), -1, WHITE), // floor
       Plane(vec3.fromValues(0, -1, 0), -1, WHITE), // ceiling
       Plane(vec3.fromValues(0, 0, 1), -1, GREEN), // back wall
-      Sphere(vec3.fromValues(0, -0.75, 0.75), 0.25, RED), // sphere on ground
-      Light(vec3.fromValues(0.75, 0.75, 1.5), WHITE), // light in top right back corner
+      Plane(vec3.fromValues(0, 0, -1), -1, WHITE), // front wall
+      Sphere(vec3.fromValues(-0.4, -0.7, 0.6), 0.3, RED), // sphere on ground
+      Sphere(vec3.fromValues(0.4, -0.7, -0.2), 0.3, BLUE), // sphere on ground
+      Light(vec3.fromValues(0.8, 0.8, -0.8), WHITE), // light in top right back corner
     ];
 
     initializeVertices(gl, shaderProgram);
+
+    const textures = initializeTextures(gl);
 
     return {
       camera: DEFAULT_CAMERA,
       gl,
       primitives,
       shaderProgram,
+      textures,
     };
   } catch (e) {
     if (e instanceof WebGLError) {

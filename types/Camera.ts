@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import { CAMERA_DISTANCE } from "utils/constants";
+import { CAMERA_DISTANCE, CAMERA_FOV } from "utils/constants";
 
 export interface Camera {
   /** Camera location */
@@ -32,7 +32,7 @@ export function Camera(
 export const DEFAULT_CAMERA = Camera(
   vec3.fromValues(0, 0, CAMERA_DISTANCE),
   vec3.fromValues(0, 0, -1),
-  Math.PI / 4,
+  CAMERA_FOV,
   vec3.fromValues(0, 1, 0)
 );
 

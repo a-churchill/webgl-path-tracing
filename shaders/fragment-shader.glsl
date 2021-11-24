@@ -2,13 +2,19 @@ precision mediump float;
 
 // CONSTANTS
 const int MAX_LIGHTS = 5;
-const int MAX_PLANES = 5;
+const int MAX_PLANES = 6;
 const int MAX_SPHERES = 5;
+
+const int MAX_BOUNCES = 5;
 
 const float MIN_TIME = 0.1;
 const float MAX_TIME = 10000.0;
 
 const float PLANE_SIZE = 1.0;
+const float ATTENUATION = 0.8;
+const float REFLECTANCE = 0.1;
+
+const float PI = 3.14159;
 
 // TYPES
 struct Camera {
@@ -22,6 +28,12 @@ struct HitRecord {
   float time;
   vec3 normal;
   vec3 color;
+};
+
+// used to cache a repeated computation
+struct Illumination {
+  vec3 dirToLight;
+  float distToLight;
 };
 
 struct Light {
@@ -52,11 +64,27 @@ uniform Camera camera;
 uniform Light lights[MAX_LIGHTS];
 uniform Plane planes[MAX_PLANES];
 uniform Sphere spheres[MAX_SPHERES];
+uniform float seed;
+
+// this is the previous frame, used to average with existing frames
+uniform sampler2D prevFrame;
+
+uniform sampler2D randomNoise;
 
 // this is the xy position of the current point, in clip space coordinates.
 varying vec2 position;
 
 // HELPER FUNCTIONS
+
+// gets a random normalized vector from an input vector.
+// credit to https://www.shadertoy.com/view/4djSRW
+vec3 rand(vec3 inVec) {
+  vec3 pos3 = fract(vec3(inVec.xyx) * vec3(.1031, .1030, .0973) * seed * 1500.0);
+  pos3 += dot(pos3, pos3.yzx + 33.33);
+  vec2 pos = fract((pos3.xx + pos3.yz) * pos3.zy);
+
+  return texture2D(randomNoise, pos).xyz;
+}
 
 // Gets the position of the given ray at the given time, in world space
 vec3 rayAtTime(Ray ray, float time) {
@@ -142,40 +170,88 @@ HitRecord intersectRay(Ray ray) {
   return hit;
 }
 
-// Returns the color of the pixel based on all lights
-vec3 getLighting(Ray ray, HitRecord hit) {
-  vec3 result;
+// Checks if the current position is shadowed from the given light by another primitive
+// in the scene.
+bool isPositionInShadow(vec3 hitPos, Illumination illumination) {
+  Ray rayToLight = Ray(hitPos + 0.001 * illumination.dirToLight, illumination.dirToLight);
 
+  HitRecord shadowHit = intersectRay(rayToLight);
+  if(shadowHit.time >= MAX_TIME) {
+    return false;
+  }
+
+  float distToClosestPrimitive = distance(rayAtTime(rayToLight, shadowHit.time), hitPos);
+  return distToClosestPrimitive < illumination.distToLight;
+}
+
+// Gets the color contribution from the given light. Does not compute shadows.
+vec3 getColorFromLight(Light light, Illumination illumination, vec3 normal, vec3 color) {
+  vec3 intensity = (light.color /
+    (ATTENUATION * illumination.distToLight * illumination.distToLight));
+  return max(dot(illumination.dirToLight, normal), 0.0) * intensity * color;
+}
+
+// Gets the contribution to the current pixel's color from direct light rays 
+vec3 getColorFromLights(Ray ray, HitRecord hit) {
+  vec3 result = vec3(0.0);
   vec3 hitPos = rayAtTime(ray, hit.time);
   for(int i = 0; i < MAX_LIGHTS; i++) {
-    // make sure we're not in shadow
     vec3 dirToLight = normalize(lights[i].origin - hitPos);
     float distToLight = distance(lights[i].origin, hitPos);
-    Ray rayToLight = Ray(hitPos + 0.001 * dirToLight, dirToLight);
-    HitRecord shadowHit = intersectRay(rayToLight);
-    if(shadowHit.time < MAX_TIME && distance(rayAtTime(rayToLight, shadowHit.time), hitPos) < distToLight) {
+
+    Illumination illumination = Illumination(dirToLight, distToLight);
+
+    if(isPositionInShadow(hitPos, illumination)) {
       continue;
     }
 
-    // confirmed not in shadow, add light's contribution to result
-    vec3 intensity = lights[i].color / (0.5 * distToLight * distToLight);
-    vec3 color = max(dot(dirToLight, hit.normal), 0.0) * intensity * hit.color;
-    result = result + color;
+    result = result + getColorFromLight(lights[i], illumination, hit.normal, hit.color);
   }
   return result;
+}
+
+// Gets the contribution to the current pixel's color from global illumination, computed
+// using a bounce.
+vec3 getColorFromGlobalIllumination(Ray ray, HitRecord hit) {
+  vec3 result = vec3(0.0);
+
+  for(int i = 0; i < MAX_BOUNCES; i++) {
+    vec3 hitPos = rayAtTime(ray, hit.time);
+    vec3 hitNormal = hit.normal;
+    vec3 randomDirection = rand(hitPos);
+
+    // constrain random vector to hemisphere of normal
+    if(dot(hit.normal, randomDirection) < 0.0) {
+      randomDirection = -randomDirection;
+    }
+
+    ray = Ray(hitPos + 0.001 * randomDirection, randomDirection);
+    hit = intersectRay(ray);
+    if(hit.time >= MAX_TIME) {
+      // nothing else to bounce off of
+      break;
+    }
+    vec3 incomingLight = getColorFromLights(ray, hit);
+
+    // apply rendering equation (2pi factor is to account for the fact we're only
+    // sampling one point in an entire hemisphere)
+    result += incomingLight * (REFLECTANCE / PI) * dot(hitNormal, ray.direction) * 2.0 * PI;
+  }
+
+  return result;
+}
+
+// Returns the color of the pixel based on all lights, as well as global illumination.
+vec3 tracePath(Ray ray) {
+  HitRecord hit = intersectRay(ray);
+  if(hit.time >= MAX_TIME) {
+    return vec3(0.0);
+  }
+  return getColorFromLights(ray, hit) + getColorFromGlobalIllumination(ray, hit);
 }
 
 // MAIN FUNCTION
 
 void main() {
-  gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-  Ray ray = generateRay(position);
-  HitRecord hit = intersectRay(ray);
-
-  if(hit.time >= MAX_TIME) {
-    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-    return;
-  }
-
-  gl_FragColor = vec4(getLighting(ray, hit), 1.0);
+  gl_FragColor = vec4(tracePath(generateRay(position)), 1.0);
 }

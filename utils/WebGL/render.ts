@@ -13,8 +13,20 @@ function copyProgramStateToBuffers({
   gl,
   primitives,
   shaderProgram,
+  textures,
 }: Program): void {
   gl.useProgram(shaderProgram.program);
+
+  // activate textures
+  gl.activeTexture(gl.TEXTURE0);
+
+  // Bind the texture to texture unit 0
+  gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+
+  // Tell the shader we bound the texture to texture unit 0
+  gl.uniform1i(shaderProgram.uniformLocations.randomNoise, 0);
+
+  gl.uniform1f(shaderProgram.uniformLocations["seed"], Math.random());
   gl.uniform3fv(shaderProgram.uniformLocations["camera.center"], camera.center);
   gl.uniform3fv(
     shaderProgram.uniformLocations["camera.direction"],
@@ -90,7 +102,7 @@ export function render(
 ): void {
   const { gl } = program;
   try {
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    // gl.clear(gl.COLOR_BUFFER_BIT);
     copyProgramStateToBuffers(program);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
   } catch (e) {

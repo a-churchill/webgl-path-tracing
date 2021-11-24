@@ -21,6 +21,8 @@ interface GenericProgram<
 
   /** Metadata about the shader program, used to set up uniform and attribute values. */
   shaderProgram: WebGLProgramMetadata<Attributes, Uniforms>;
+
+  textures: WebGLTexture[];
 }
 
 export const PROGRAM_ATTRIBUTES = ["vertexPosition"] as const;
@@ -33,13 +35,20 @@ type LightUniformNames = `lights[${number}].${"origin" | "color"}`;
 type PlaneUniformNames = `planes[${number}].${"normal" | "d" | "color"}`;
 type SphereUniformNames = `spheres[${number}].${"center" | "radius" | "color"}`;
 
+type OtherUniformNames = "prevFrame" | "randomNoise" | "seed";
+
 /** Uniforms we need to define to give plane locations */
 export const PROGRAM_UNIFORMS: (
   | CameraUniformNames
   | LightUniformNames
+  | OtherUniformNames
   | PlaneUniformNames
   | SphereUniformNames
 )[] = [
+  "prevFrame",
+  "randomNoise",
+  "seed",
+
   "camera.center",
   "camera.direction",
   "camera.fov",
@@ -71,6 +80,9 @@ export const PROGRAM_UNIFORMS: (
   "planes[4].normal",
   "planes[4].d",
   "planes[4].color",
+  "planes[5].normal",
+  "planes[5].d",
+  "planes[5].color",
 
   "spheres[0].center",
   "spheres[0].radius",

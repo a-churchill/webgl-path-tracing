@@ -21,9 +21,11 @@ export default function Canvas() {
 
   const renderCallback = useCallback(
     (program: Program | undefined) => {
-      if (program !== undefined) {
-        render(program, onErrorCallback);
-      }
+      requestAnimationFrame(() => {
+        if (program !== undefined) {
+          render(program, onErrorCallback);
+        }
+      });
     },
     [onErrorCallback]
   );

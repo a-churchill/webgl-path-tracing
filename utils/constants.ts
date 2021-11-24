@@ -1,9 +1,10 @@
 import { vec3 } from "gl-matrix";
 
-export const CAMERA_DISTANCE = 3.41421356;
+export const CAMERA_FOV = Math.PI / 4;
+export const CAMERA_DISTANCE = 1 + 1 / Math.tan(CAMERA_FOV / 2);
 export const CANVAS_ID = "webgl-canvas";
 export const MAX_LIGHTS = 5;
-export const MAX_PLANES = 5;
+export const MAX_PLANES = 6;
 export const MAX_SPHERES = 5;
 
 // colors
