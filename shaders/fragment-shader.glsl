@@ -11,8 +11,8 @@ const float MIN_TIME = 0.1;
 const float MAX_TIME = 10000.0;
 
 const float PLANE_SIZE = 1.0;
-const float ATTENUATION = 0.8;
-const float REFLECTANCE = 0.1;
+const float ATTENUATION = 1.0;
+const float REFLECTANCE = 0.2;
 
 const float PI = 3.14159;
 
@@ -41,6 +41,12 @@ struct Light {
   vec3 color;
 };
 
+// represents a stop along the path we are tracing
+struct PathBounce {
+  vec3 normal;
+  vec3 outgoingRay;
+};
+
 struct Plane {
   vec3 normal;
   float d;
@@ -66,9 +72,12 @@ uniform Plane planes[MAX_PLANES];
 uniform Sphere spheres[MAX_SPHERES];
 uniform float seed;
 
-// this is the previous frame, used to average with existing frames
+// this is the previous frame (in particular, the average of the previous `renderCount`
+// frames)
 uniform sampler2D prevFrame;
-
+// we average the current frame with the previous `renderCount` frames
+uniform int renderCount;
+// this is random noise, provided from a PNG
 uniform sampler2D randomNoise;
 
 // this is the xy position of the current point, in clip space coordinates.
@@ -191,7 +200,8 @@ vec3 getColorFromLight(Light light, Illumination illumination, vec3 normal, vec3
   return max(dot(illumination.dirToLight, normal), 0.0) * intensity * color;
 }
 
-// Gets the contribution to the current pixel's color from direct light rays 
+// Gets the contribution to the current pixel's color from direct light rays. Assumes
+// the `HitRecord` passed is valid.
 vec3 getColorFromLights(Ray ray, HitRecord hit) {
   vec3 result = vec3(0.0);
   vec3 hitPos = rayAtTime(ray, hit.time);
@@ -211,34 +221,65 @@ vec3 getColorFromLights(Ray ray, HitRecord hit) {
 }
 
 // Gets the contribution to the current pixel's color from global illumination, computed
-// using a bounce.
+// using a bounce. Computes illumination baseed on the incoming light, computed
+// recursively `MAX_BOUNCES` times.
 vec3 getColorFromGlobalIllumination(Ray ray, HitRecord hit) {
-  vec3 result = vec3(0.0);
+  PathBounce bounces[MAX_BOUNCES];
+
+  // contributions from lights (not global illumination)
+  vec3 lightColors[MAX_BOUNCES];
+
+  // store number of valid bounces - we want to ignore bounces after the ray doesn't
+  // hit any primitives
+  int validBounces = 0;
 
   for(int i = 0; i < MAX_BOUNCES; i++) {
     vec3 hitPos = rayAtTime(ray, hit.time);
-    vec3 hitNormal = hit.normal;
+    vec3 normal = hit.normal;
     vec3 randomDirection = rand(hitPos);
 
     // constrain random vector to hemisphere of normal
     if(dot(hit.normal, randomDirection) < 0.0) {
       randomDirection = -randomDirection;
     }
+    bounces[i] = PathBounce(normal, randomDirection);
 
+    // offset a bit in direction of ray, to avoid self hits
     ray = Ray(hitPos + 0.001 * randomDirection, randomDirection);
     hit = intersectRay(ray);
     if(hit.time >= MAX_TIME) {
       // nothing else to bounce off of
       break;
     }
-    vec3 incomingLight = getColorFromLights(ray, hit);
+    lightColors[i] = getColorFromLights(ray, hit);
+    validBounces++;
+  }
+
+  // bookkeeping for recursive color calculations
+  vec3 colors[MAX_BOUNCES];
+
+  // work backwards to compute color - we need to do this backwards because bounce i
+  // relies on bounce i+1
+  for(int i = MAX_BOUNCES - 1; i >= 0; i--) {
+    if(i >= validBounces) {
+      continue;
+    }
+    vec3 hitNormal = bounces[i].normal;
+    vec3 outgoingRay = bounces[i].outgoingRay;
+    vec3 incomingLight = lightColors[i];
+
+    // protect from array out-of-bounds errors
+    if(i < MAX_BOUNCES - 1) {
+      incomingLight += colors[i + 1];
+    }
 
     // apply rendering equation (2pi factor is to account for the fact we're only
     // sampling one point in an entire hemisphere)
-    result += incomingLight * (REFLECTANCE / PI) * dot(hitNormal, ray.direction) * 2.0 * PI;
+    float brdf = (REFLECTANCE / PI);
+    colors[i] = incomingLight * brdf * dot(outgoingRay, hitNormal) * 2.0 * PI;
   }
 
-  return result;
+  return colors[0];
 }
 
 // Returns the color of the pixel based on all lights, as well as global illumination.
@@ -247,11 +288,14 @@ vec3 tracePath(Ray ray) {
   if(hit.time >= MAX_TIME) {
     return vec3(0.0);
   }
+  // return getColorFromGlobalIllumination(ray, hit);
   return getColorFromLights(ray, hit) + getColorFromGlobalIllumination(ray, hit);
 }
 
 // MAIN FUNCTION
 
 void main() {
-  gl_FragColor = vec4(tracePath(generateRay(position)), 1.0);
+  vec2 uvPosition = position * 0.5 + vec2(0.5); // [-1, 1] x [-1, 1] -> [0, 1] x [0, 1]
+  vec4 prevFramePixel = texture2D(prevFrame, uvPosition);
+  gl_FragColor = (float(renderCount - 1) * prevFramePixel + vec4(tracePath(generateRay(position)), 1.0)) / float(renderCount);
 }

@@ -142,23 +142,36 @@ function initializeShaderProgram(
  * @returns texture objects
  */
 function initializeTextures(gl: WebGLRenderingContext): WebGLTexture[] {
-  const texture = gl.createTexture();
-  if (texture === null) {
-    throw new WebGLError("Could not create texture");
+  const randomNoiseTexture = gl.createTexture();
+  if (randomNoiseTexture === null) {
+    throw new WebGLError("Could not create random noise texture");
   }
-  gl.bindTexture(gl.TEXTURE_2D, texture);
   const image = new Image();
-  image.src = "noise.png";
+
+  // bind image to texture when it loads
   image.addEventListener("load", () => {
-    console.log("Loaded texture", image);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.bindTexture(gl.TEXTURE_2D, randomNoiseTexture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     // turn off mips and set wrapping to clamp to edge
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   });
-  return [texture];
+
+  // start image loading
+  image.src = "noise.png";
+
+  const prevSceneTexture = gl.createTexture();
+  if (prevSceneTexture === null) {
+    throw new WebGLError("Could not create previous scene texture");
+  }
+  gl.bindTexture(gl.TEXTURE_2D, prevSceneTexture);
+  // turn off mips and set wrapping to clamp to edge
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+  return [randomNoiseTexture, prevSceneTexture];
 }
 
 /**
@@ -235,9 +248,9 @@ export default function initializeProgram(
       Plane(vec3.fromValues(0, -1, 0), -1, WHITE), // ceiling
       Plane(vec3.fromValues(0, 0, 1), -1, GREEN), // back wall
       Plane(vec3.fromValues(0, 0, -1), -1, WHITE), // front wall
-      Sphere(vec3.fromValues(-0.4, -0.7, 0.6), 0.3, RED), // sphere on ground
+      Sphere(vec3.fromValues(-0.2, -0.7, 0.4), 0.3, RED), // sphere on ground
       Sphere(vec3.fromValues(0.4, -0.7, -0.2), 0.3, BLUE), // sphere on ground
-      Light(vec3.fromValues(0.8, 0.8, -0.8), WHITE), // light in top right back corner
+      Light(vec3.fromValues(0.7, 0.7, 0.7), WHITE), // light in corner
     ];
 
     initializeVertices(gl, shaderProgram);

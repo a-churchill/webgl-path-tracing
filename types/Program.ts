@@ -35,7 +35,7 @@ type LightUniformNames = `lights[${number}].${"origin" | "color"}`;
 type PlaneUniformNames = `planes[${number}].${"normal" | "d" | "color"}`;
 type SphereUniformNames = `spheres[${number}].${"center" | "radius" | "color"}`;
 
-type OtherUniformNames = "prevFrame" | "randomNoise" | "seed";
+type OtherUniformNames = "prevFrame" | "randomNoise" | "renderCount" | "seed";
 
 /** Uniforms we need to define to give plane locations */
 export const PROGRAM_UNIFORMS: (
@@ -47,6 +47,7 @@ export const PROGRAM_UNIFORMS: (
 )[] = [
   "prevFrame",
   "randomNoise",
+  "renderCount",
   "seed",
 
   "camera.center",

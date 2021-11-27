@@ -1,6 +1,13 @@
 import { PrimitiveType } from "types/Primitive";
 import { Program } from "types/Program";
-import { MAX_LIGHTS, MAX_PLANES, MAX_SPHERES } from "utils/constants";
+import {
+  IMAGE_SIZE,
+  MAX_LIGHTS,
+  MAX_PLANES,
+  MAX_SPHERES,
+  PREV_FRAME_TEXTURE_INDEX,
+  RANDOM_NOISE_TEXTURE_INDEX,
+} from "utils/constants";
 import { unreachable, WebGLError } from "utils/errors";
 
 /**
@@ -8,25 +15,33 @@ import { unreachable, WebGLError } from "utils/errors";
  *
  * @param program current program state
  */
-function copyProgramStateToBuffers({
-  camera,
-  gl,
-  primitives,
-  shaderProgram,
-  textures,
-}: Program): void {
+function copyProgramStateToBuffers(
+  { camera, gl, primitives, shaderProgram, textures }: Program,
+  renderCount: number
+): void {
   gl.useProgram(shaderProgram.program);
 
-  // activate textures
-  gl.activeTexture(gl.TEXTURE0);
-
-  // Bind the texture to texture unit 0
-  gl.bindTexture(gl.TEXTURE_2D, textures[0]);
-
-  // Tell the shader we bound the texture to texture unit 0
-  gl.uniform1i(shaderProgram.uniformLocations.randomNoise, 0);
-
+  // set up utility values
+  gl.uniform1i(shaderProgram.uniformLocations.renderCount, renderCount);
   gl.uniform1f(shaderProgram.uniformLocations["seed"], Math.random());
+
+  // set up random noise texture
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, textures[RANDOM_NOISE_TEXTURE_INDEX]);
+  gl.uniform1i(
+    shaderProgram.uniformLocations.randomNoise,
+    RANDOM_NOISE_TEXTURE_INDEX
+  );
+
+  // set up previous frame texture
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, textures[PREV_FRAME_TEXTURE_INDEX]);
+  gl.uniform1i(
+    shaderProgram.uniformLocations.prevFrame,
+    PREV_FRAME_TEXTURE_INDEX
+  );
+
+  // set up camera properties
   gl.uniform3fv(shaderProgram.uniformLocations["camera.center"], camera.center);
   gl.uniform3fv(
     shaderProgram.uniformLocations["camera.direction"],
@@ -35,6 +50,7 @@ function copyProgramStateToBuffers({
   gl.uniform1f(shaderProgram.uniformLocations["camera.fov"], camera.fov);
   gl.uniform3fv(shaderProgram.uniformLocations["camera.up"], camera.up);
 
+  // set up primitives
   let lightIndex = 0;
   let planeIndex = 0;
   let sphereIndex = 0;
@@ -96,15 +112,55 @@ function copyProgramStateToBuffers({
   }
 }
 
+// buffer size is 4 numbers per pixel (RGBA) * number of pixels
+/**
+ * Array holding current pixels, allocated once for better performance.
+ */
+const currentPixels = new Uint8Array(IMAGE_SIZE * IMAGE_SIZE * 4);
+
+/**
+ * Saves the current pixels in the WebGL frame to a texture, to use in
+ * future renders.
+ *
+ * @param program current program state
+ */
+function saveCurrentFrameToTexture(program: Program): void {
+  const { gl } = program;
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, program.textures[PREV_FRAME_TEXTURE_INDEX]);
+
+  gl.readPixels(
+    0,
+    0,
+    IMAGE_SIZE,
+    IMAGE_SIZE,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    currentPixels
+  );
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.RGBA,
+    IMAGE_SIZE,
+    IMAGE_SIZE,
+    0,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    currentPixels
+  );
+}
+
 export function render(
   program: Program,
+  renderCount: number,
   onError: (errorInfo: string) => void
 ): void {
   const { gl } = program;
   try {
-    // gl.clear(gl.COLOR_BUFFER_BIT);
-    copyProgramStateToBuffers(program);
+    copyProgramStateToBuffers(program, renderCount);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+    saveCurrentFrameToTexture(program);
   } catch (e) {
     if (e instanceof WebGLError) {
       onError(e.message);
