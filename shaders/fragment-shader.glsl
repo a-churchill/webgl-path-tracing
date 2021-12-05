@@ -2,17 +2,17 @@ precision mediump float;
 
 // CONSTANTS
 const int MAX_LIGHTS = 5;
-const int MAX_PLANES = 6;
+const int MAX_PLANES = 10;
 const int MAX_SPHERES = 5;
 
 const int MAX_BOUNCES = 5;
 
 const float MIN_TIME = 0.1;
 const float MAX_TIME = 10000.0;
+const float EPSILON = 0.0001;
 
-const float PLANE_SIZE = 1.0;
 const float ATTENUATION = 1.0;
-const float REFLECTANCE = 0.2;
+const float REFLECTANCE = 0.5;
 
 const float PI = 3.14159;
 
@@ -28,6 +28,7 @@ struct HitRecord {
   float time;
   vec3 normal;
   vec3 color;
+  float emittance;
 };
 
 // used to cache a repeated computation
@@ -36,9 +37,10 @@ struct Illumination {
   float distToLight;
 };
 
-struct Light {
+struct PointLight {
   vec3 origin;
   vec3 color;
+  float brightness;
 };
 
 // represents a stop along the path we are tracing
@@ -50,7 +52,10 @@ struct PathBounce {
 struct Plane {
   vec3 normal;
   float d;
+  vec3 up;
+  float sideLength;
   vec3 color;
+  float emittance;
 };
 
 struct Ray {
@@ -62,15 +67,17 @@ struct Sphere {
   vec3 center;
   float radius;
   vec3 color;
+  float emittance;
 };
 
 // INPUTS
 
 uniform Camera camera;
-uniform Light lights[MAX_LIGHTS];
+uniform PointLight pointLights[MAX_LIGHTS];
 uniform Plane planes[MAX_PLANES];
 uniform Sphere spheres[MAX_SPHERES];
 uniform float seed;
+uniform float seed2;
 
 // this is the previous frame (in particular, the average of the previous `renderCount`
 // frames)
@@ -85,6 +92,16 @@ varying vec2 position;
 
 // HELPER FUNCTIONS
 
+// gets a random number in [-1, 1].
+// credit to https://www.shadertoy.com/view/4djSRW
+float rand1(vec3 inVec, float seed) {
+  vec3 pos3 = fract(vec3(inVec.xyx) * vec3(.1031, .1030, .0973) * seed * 1500.0);
+  pos3 += dot(pos3, pos3.yzx + 33.33);
+  vec2 pos = fract((pos3.xx + pos3.yz) * pos3.zy);
+
+  return texture2D(randomNoise, pos).x * 2.0 - 1.0;
+}
+
 // gets a random normalized vector from an input vector.
 // credit to https://www.shadertoy.com/view/4djSRW
 vec3 rand(vec3 inVec) {
@@ -92,7 +109,7 @@ vec3 rand(vec3 inVec) {
   pos3 += dot(pos3, pos3.yzx + 33.33);
   vec2 pos = fract((pos3.xx + pos3.yz) * pos3.zy);
 
-  return texture2D(randomNoise, pos).xyz;
+  return normalize(texture2D(randomNoise, pos).xyz * 2.0 - vec3(1.0));
 }
 
 // Gets the position of the given ray at the given time, in world space
@@ -110,28 +127,68 @@ Ray generateRay(vec2 position) {
   return Ray(camera.center, new_dir);
 }
 
-HitRecord intersectRayWithPrimitive(Ray ray, Plane plane, HitRecord hit) {
+// Get the center point of a plane.
+vec3 getCenterOfPlane(vec3 normal, float d) {
+  return normal * sign(d) * sqrt(abs(d));
+}
+
+vec3 computeVectorToLight(vec3 hitPos, PointLight light) {
+  return light.origin - hitPos;
+}
+
+vec3 computeVectorToLight(vec3 hitPos, Plane light) {
+  // compute random position on plane
+  vec3 basis1 = light.up;
+  vec3 basis2 = cross(light.normal, light.up);
+
+  float offset1 = rand1(hitPos, seed) * light.sideLength;
+  float offset2 = rand1(hitPos, seed2) * light.sideLength;
+
+  vec3 posOnPlane = getCenterOfPlane(light.normal, light.d) + (basis1 * offset1) + (basis2 * offset2);
+  return posOnPlane - hitPos;
+}
+
+vec3 computeVectorToLight(vec3 hitPos, Sphere light) {
+  // compute random postion on sphere
+  vec3 posOnSphere = rand(hitPos) * light.radius + light.center;
+
+  return posOnSphere - hitPos;
+}
+
+Illumination getIllumination(vec3 vecToLight) {
+  return Illumination(normalize(vecToLight), length(vecToLight));
+}
+
+HitRecord intersectRayWithPrimitive(Ray ray, Plane plane, HitRecord hit, bool ignoreEmitters) {
   if(dot(plane.normal, ray.direction) > 0.0) {
     // ignore plane if we're on the wrong side of it
+    return hit;
+  }
+  if(ignoreEmitters && plane.emittance >= EPSILON) {
     return hit;
   }
   float time = (plane.d - dot(plane.normal, ray.origin)) / dot(plane.normal, ray.direction);
   if(MIN_TIME < time && time < hit.time) {
     vec3 pointOnPlane = rayAtTime(ray, time);
-    vec3 centerOfPlane = plane.normal * (plane.d / abs(plane.d)) * sqrt(abs(plane.d));
+    vec3 centerOfPlane = getCenterOfPlane(plane.normal, plane.d);
     vec3 difference = pointOnPlane - centerOfPlane;
-    if(abs(difference.x) > PLANE_SIZE || abs(difference.y) > PLANE_SIZE || abs(difference.z) > PLANE_SIZE) {
+    if(abs(difference.x) > plane.sideLength || abs(difference.y) > plane.sideLength || abs(difference.z) > plane.sideLength) {
       return hit;
     }
 
     hit.time = time;
     hit.normal = plane.normal;
     hit.color = plane.color;
+    hit.emittance = plane.emittance;
   }
   return hit;
 }
 
-HitRecord intersectRayWithPrimitive(Ray ray, Sphere sphere, HitRecord hit) {
+HitRecord intersectRayWithPrimitive(Ray ray, Sphere sphere, HitRecord hit, bool ignoreEmitters) {
+  if(ignoreEmitters && sphere.emittance >= EPSILON) {
+    return hit;
+  }
+
   // put sphere at center
   ray.origin = ray.origin - sphere.center;
 
@@ -158,22 +215,23 @@ HitRecord intersectRayWithPrimitive(Ray ray, Sphere sphere, HitRecord hit) {
     hit.time = t;
     hit.normal = normalize(rayAtTime(ray, t));
     hit.color = sphere.color;
+    hit.emittance = sphere.emittance;
   }
   return hit;
 }
 
 // Checks the ray's intersection with all primitives
-HitRecord intersectRay(Ray ray) {
+HitRecord intersectRay(Ray ray, bool ignoreEmitters) {
   HitRecord hit;
   hit.time = MAX_TIME;
   hit.color = vec3(0.0, 0.0, 0.0);
 
   for(int i = 0; i < MAX_PLANES; i++) {
-    hit = intersectRayWithPrimitive(ray, planes[i], hit);
+    hit = intersectRayWithPrimitive(ray, planes[i], hit, ignoreEmitters);
   }
 
   for(int i = 0; i < MAX_SPHERES; i++) {
-    hit = intersectRayWithPrimitive(ray, spheres[i], hit);
+    hit = intersectRayWithPrimitive(ray, spheres[i], hit, ignoreEmitters);
   }
 
   return hit;
@@ -182,9 +240,9 @@ HitRecord intersectRay(Ray ray) {
 // Checks if the current position is shadowed from the given light by another primitive
 // in the scene.
 bool isPositionInShadow(vec3 hitPos, Illumination illumination) {
-  Ray rayToLight = Ray(hitPos + 0.001 * illumination.dirToLight, illumination.dirToLight);
+  Ray rayToLight = Ray(hitPos + EPSILON * illumination.dirToLight, illumination.dirToLight);
 
-  HitRecord shadowHit = intersectRay(rayToLight);
+  HitRecord shadowHit = intersectRay(rayToLight, true);
   if(shadowHit.time >= MAX_TIME) {
     return false;
   }
@@ -194,28 +252,59 @@ bool isPositionInShadow(vec3 hitPos, Illumination illumination) {
 }
 
 // Gets the color contribution from the given light. Does not compute shadows.
-vec3 getColorFromLight(Light light, Illumination illumination, vec3 normal, vec3 color) {
-  vec3 intensity = (light.color /
+vec3 getColorFromLight(vec3 lightColor, Illumination illumination, HitRecord hit) {
+  vec3 intensity = (lightColor /
     (ATTENUATION * illumination.distToLight * illumination.distToLight));
-  return max(dot(illumination.dirToLight, normal), 0.0) * intensity * color;
+  return max(dot(illumination.dirToLight, hit.normal), 0.0) * intensity * hit.color;
 }
 
 // Gets the contribution to the current pixel's color from direct light rays. Assumes
 // the `HitRecord` passed is valid.
 vec3 getColorFromLights(Ray ray, HitRecord hit) {
-  vec3 result = vec3(0.0);
+  vec3 result = hit.emittance * hit.color;
   vec3 hitPos = rayAtTime(ray, hit.time);
-  for(int i = 0; i < MAX_LIGHTS; i++) {
-    vec3 dirToLight = normalize(lights[i].origin - hitPos);
-    float distToLight = distance(lights[i].origin, hitPos);
 
-    Illumination illumination = Illumination(dirToLight, distToLight);
+  // compute point lights
+  for(int i = 0; i < MAX_LIGHTS; i++) {
+    vec3 vecToLight = computeVectorToLight(hitPos, pointLights[i]);
+    Illumination illumination = getIllumination(vecToLight);
 
     if(isPositionInShadow(hitPos, illumination)) {
       continue;
     }
+    result = result + getColorFromLight(pointLights[i].color * pointLights[i].brightness, illumination, hit);
+  }
 
-    result = result + getColorFromLight(lights[i], illumination, hit.normal, hit.color);
+  // compute plane lights
+  for(int i = 0; i < MAX_PLANES; i++) {
+    Plane plane = planes[i];
+    if(plane.emittance <= EPSILON) {
+      continue;
+    }
+
+    vec3 vecToLight = computeVectorToLight(hitPos, plane);
+    Illumination illumination = getIllumination(vecToLight);
+
+    if(isPositionInShadow(hitPos, illumination)) {
+      continue;
+    }
+    result = result + getColorFromLight(plane.color * plane.emittance, illumination, hit);
+  }
+
+  // compute plane lights
+  for(int i = 0; i < MAX_SPHERES; i++) {
+    Sphere sphere = spheres[i];
+    if(sphere.emittance <= EPSILON) {
+      continue;
+    }
+
+    vec3 vecToLight = computeVectorToLight(hitPos, sphere);
+    Illumination illumination = getIllumination(vecToLight);
+
+    if(isPositionInShadow(hitPos, illumination)) {
+      continue;
+    }
+    result = result + getColorFromLight(sphere.color * sphere.emittance, illumination, hit);
   }
   return result;
 }
@@ -224,6 +313,7 @@ vec3 getColorFromLights(Ray ray, HitRecord hit) {
 // using a bounce. Computes illumination baseed on the incoming light, computed
 // recursively `MAX_BOUNCES` times.
 vec3 getColorFromGlobalIllumination(Ray ray, HitRecord hit) {
+  vec3 initialColor = hit.color;
   PathBounce bounces[MAX_BOUNCES];
 
   // contributions from lights (not global illumination)
@@ -245,8 +335,8 @@ vec3 getColorFromGlobalIllumination(Ray ray, HitRecord hit) {
     bounces[i] = PathBounce(normal, randomDirection);
 
     // offset a bit in direction of ray, to avoid self hits
-    ray = Ray(hitPos + 0.001 * randomDirection, randomDirection);
-    hit = intersectRay(ray);
+    ray = Ray(hitPos + EPSILON * randomDirection, randomDirection);
+    hit = intersectRay(ray, false);
     if(hit.time >= MAX_TIME) {
       // nothing else to bounce off of
       break;
@@ -279,15 +369,16 @@ vec3 getColorFromGlobalIllumination(Ray ray, HitRecord hit) {
     colors[i] = incomingLight * brdf * dot(outgoingRay, hitNormal) * 2.0 * PI;
   }
 
-  return colors[0];
+  return colors[0] * initialColor;
 }
 
 // Returns the color of the pixel based on all lights, as well as global illumination.
 vec3 tracePath(Ray ray) {
-  HitRecord hit = intersectRay(ray);
+  HitRecord hit = intersectRay(ray, false);
   if(hit.time >= MAX_TIME) {
     return vec3(0.0);
   }
+  // return getColorFromLights(ray, hit);
   // return getColorFromGlobalIllumination(ray, hit);
   return getColorFromLights(ray, hit) + getColorFromGlobalIllumination(ray, hit);
 }

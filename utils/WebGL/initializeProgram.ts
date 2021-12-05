@@ -1,9 +1,7 @@
 import fsSource from "shaders/fragment-shader.glsl";
 import vsSource from "shaders/vertex-shader.glsl";
 
-import { vec3 } from "gl-matrix";
 import { DEFAULT_CAMERA } from "types/Camera";
-import { Light, Plane, Sphere } from "types/Primitive";
 import {
   Attributes,
   Program,
@@ -11,8 +9,9 @@ import {
   PROGRAM_UNIFORMS,
   Uniforms,
 } from "types/Program";
-import { BLUE, CANVAS_ID, GREEN, RED, WHITE } from "utils/constants";
+import { CANVAS_ID } from "utils/constants";
 import { WebGLError } from "utils/errors";
+import { CORNELL_BOX_AREA_LIGHT } from "utils/presetPrograms";
 
 /**
  * Initializes the buffers used to communicate with the WebGL program.
@@ -240,27 +239,13 @@ export default function initializeProgram(
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     const shaderProgram = initializeShaderProgram(gl, vsSource, fsSource);
-
-    const primitives = [
-      Plane(vec3.fromValues(1, 0, 0), -1, RED), // left wall
-      Plane(vec3.fromValues(-1, 0, 0), -1, BLUE), // right wall
-      Plane(vec3.fromValues(0, 1, 0), -1, WHITE), // floor
-      Plane(vec3.fromValues(0, -1, 0), -1, WHITE), // ceiling
-      Plane(vec3.fromValues(0, 0, 1), -1, GREEN), // back wall
-      Plane(vec3.fromValues(0, 0, -1), -1, WHITE), // front wall
-      Sphere(vec3.fromValues(-0.2, -0.7, 0.4), 0.3, RED), // sphere on ground
-      Sphere(vec3.fromValues(0.4, -0.7, -0.2), 0.3, BLUE), // sphere on ground
-      Light(vec3.fromValues(0.7, 0.7, 0.7), WHITE), // light in corner
-    ];
-
     initializeVertices(gl, shaderProgram);
-
     const textures = initializeTextures(gl);
 
     return {
       camera: DEFAULT_CAMERA,
       gl,
-      primitives,
+      primitives: CORNELL_BOX_AREA_LIGHT,
       shaderProgram,
       textures,
     };

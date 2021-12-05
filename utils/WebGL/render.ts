@@ -1,4 +1,5 @@
-import { PrimitiveType } from "types/Primitive";
+import { vec3 } from "gl-matrix";
+import { Plane, PointLight, PrimitiveType, Sphere } from "types/Primitive";
 import { Program } from "types/Program";
 import {
   IMAGE_SIZE,
@@ -23,7 +24,8 @@ function copyProgramStateToBuffers(
 
   // set up utility values
   gl.uniform1i(shaderProgram.uniformLocations.renderCount, renderCount);
-  gl.uniform1f(shaderProgram.uniformLocations["seed"], Math.random());
+  gl.uniform1f(shaderProgram.uniformLocations.seed, Math.random());
+  gl.uniform1f(shaderProgram.uniformLocations.seed2, Math.random());
 
   // set up random noise texture
   gl.activeTexture(gl.TEXTURE0);
@@ -51,64 +53,55 @@ function copyProgramStateToBuffers(
   gl.uniform3fv(shaderProgram.uniformLocations["camera.up"], camera.up);
 
   // set up primitives
-  let lightIndex = 0;
+  let pointLightIndex = 0;
   let planeIndex = 0;
   let sphereIndex = 0;
   for (const primitive of primitives) {
     switch (primitive.type) {
-      case PrimitiveType.Light:
-        if (lightIndex >= MAX_LIGHTS) {
-          throw new WebGLError("Too many lights");
-        }
-        gl.uniform3fv(
-          shaderProgram.uniformLocations[`lights[${lightIndex}].origin`],
-          primitive.origin
-        );
-        gl.uniform3fv(
-          shaderProgram.uniformLocations[`lights[${lightIndex}].color`],
-          primitive.color
-        );
-        lightIndex++;
+      case PrimitiveType.PointLight:
+        setPointLightUniforms(gl, shaderProgram, primitive, pointLightIndex);
+        pointLightIndex++;
         break;
       case PrimitiveType.Plane:
-        if (planeIndex >= MAX_PLANES) {
-          throw new WebGLError("Too many planes");
-        }
-        gl.uniform3fv(
-          shaderProgram.uniformLocations[`planes[${planeIndex}].normal`],
-          primitive.normal
-        );
-        gl.uniform1f(
-          shaderProgram.uniformLocations[`planes[${planeIndex}].d`],
-          primitive.d
-        );
-        gl.uniform3fv(
-          shaderProgram.uniformLocations[`planes[${planeIndex}].color`],
-          primitive.color
-        );
+        setPlaneUniforms(gl, shaderProgram, primitive, planeIndex);
         planeIndex++;
         break;
       case PrimitiveType.Sphere:
-        if (sphereIndex >= MAX_SPHERES) {
-          throw new WebGLError("Too many spheres");
-        }
-        gl.uniform3fv(
-          shaderProgram.uniformLocations[`spheres[${sphereIndex}].center`],
-          primitive.center
-        );
-        gl.uniform1f(
-          shaderProgram.uniformLocations[`spheres[${sphereIndex}].radius`],
-          primitive.radius
-        );
-        gl.uniform3fv(
-          shaderProgram.uniformLocations[`spheres[${sphereIndex}].color`],
-          primitive.color
-        );
+        setSphereUniforms(gl, shaderProgram, primitive, sphereIndex);
         sphereIndex++;
         break;
       default:
         unreachable(primitive);
     }
+  }
+
+  // reset now unused primitives
+  while (pointLightIndex < MAX_LIGHTS) {
+    setPointLightUniforms(
+      gl,
+      shaderProgram,
+      PointLight(vec3.create(), vec3.create(), 0),
+      pointLightIndex
+    );
+    pointLightIndex++;
+  }
+  while (planeIndex < MAX_PLANES) {
+    setPlaneUniforms(
+      gl,
+      shaderProgram,
+      Plane(vec3.create(), 0, vec3.create(), 0, vec3.create()),
+      planeIndex
+    );
+    planeIndex++;
+  }
+  while (sphereIndex < MAX_SPHERES) {
+    setSphereUniforms(
+      gl,
+      shaderProgram,
+      Sphere(vec3.create(), 0, vec3.create()),
+      sphereIndex
+    );
+    sphereIndex++;
   }
 }
 
@@ -148,6 +141,102 @@ function saveCurrentFrameToTexture(program: Program): void {
     gl.RGBA,
     gl.UNSIGNED_BYTE,
     currentPixels
+  );
+}
+
+/**
+ * Set up uniforms for the given plane.
+ */
+export function setPlaneUniforms(
+  gl: WebGLRenderingContext,
+  shaderProgram: Program["shaderProgram"],
+  plane: Plane,
+  planeIndex: number
+) {
+  if (planeIndex >= MAX_PLANES) {
+    throw new WebGLError("Too many planes");
+  }
+  gl.uniform3fv(
+    shaderProgram.uniformLocations[`planes[${planeIndex}].normal`],
+    plane.normal
+  );
+  gl.uniform3fv(
+    shaderProgram.uniformLocations[`planes[${planeIndex}].up`],
+    plane.up
+  );
+  gl.uniform1f(
+    shaderProgram.uniformLocations[`planes[${planeIndex}].d`],
+    plane.d
+  );
+  gl.uniform1f(
+    shaderProgram.uniformLocations[`planes[${planeIndex}].sideLength`],
+    plane.sideLength
+  );
+  gl.uniform1f(
+    shaderProgram.uniformLocations[`planes[${planeIndex}].emittance`],
+    plane.emittance
+  );
+  gl.uniform3fv(
+    shaderProgram.uniformLocations[`planes[${planeIndex}].color`],
+    plane.color
+  );
+}
+
+/**
+ * Set up uniforms for the given point light.
+ */
+export function setPointLightUniforms(
+  gl: WebGLRenderingContext,
+  shaderProgram: Program["shaderProgram"],
+  pointLight: PointLight,
+  pointLightIndex: number
+) {
+  if (pointLightIndex >= MAX_LIGHTS) {
+    throw new WebGLError("Too many lights");
+  }
+  gl.uniform3fv(
+    shaderProgram.uniformLocations[`pointLights[${pointLightIndex}].origin`],
+    pointLight.origin
+  );
+  gl.uniform3fv(
+    shaderProgram.uniformLocations[`pointLights[${pointLightIndex}].color`],
+    pointLight.color
+  );
+  gl.uniform1f(
+    shaderProgram.uniformLocations[
+      `pointLights[${pointLightIndex}].brightness`
+    ],
+    pointLight.brightness
+  );
+}
+
+/**
+ * Set up uniforms for the given point light.
+ */
+export function setSphereUniforms(
+  gl: WebGLRenderingContext,
+  shaderProgram: Program["shaderProgram"],
+  sphere: Sphere,
+  sphereIndex: number
+) {
+  if (sphereIndex >= MAX_SPHERES) {
+    throw new WebGLError("Too many spheres");
+  }
+  gl.uniform3fv(
+    shaderProgram.uniformLocations[`spheres[${sphereIndex}].center`],
+    sphere.center
+  );
+  gl.uniform1f(
+    shaderProgram.uniformLocations[`spheres[${sphereIndex}].radius`],
+    sphere.radius
+  );
+  gl.uniform1f(
+    shaderProgram.uniformLocations[`spheres[${sphereIndex}].emittance`],
+    sphere.emittance
+  );
+  gl.uniform3fv(
+    shaderProgram.uniformLocations[`spheres[${sphereIndex}].color`],
+    sphere.color
   );
 }
 

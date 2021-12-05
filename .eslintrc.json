@@ -1,6 +1,8 @@
 {
-  "extends": "next/core-web-vitals",
+  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
+  "parser": "@typescript-eslint/parser",
   "plugins": [
+    "@typescript-eslint",
     "simple-import-sort"
   ],
   "rules": {
@@ -33,6 +35,7 @@
           ]
         ]
       }
-    ]
+    ],
+    "@typescript-eslint/sort-type-union-intersection-members": "warn"
   }
 }
