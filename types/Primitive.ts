@@ -3,6 +3,7 @@ import { vec3 } from "gl-matrix";
 export enum MaterialType {
   Diffuse = 0,
   Reflective = 1,
+  Glass = 2,
 }
 
 export enum PrimitiveType {
@@ -42,6 +43,7 @@ export interface Plane {
   sideLength: number;
   color: vec3;
   emittance: number;
+  materialType: MaterialType;
 }
 
 /** Factory function to create a plane primitive. */
@@ -51,6 +53,7 @@ export function Plane(
   up: vec3,
   sideLength: number,
   color: vec3,
+  materialType = MaterialType.Diffuse,
   emittance = 0
 ): Plane {
   return {
@@ -61,6 +64,7 @@ export function Plane(
     sideLength,
     color,
     emittance,
+    materialType,
   };
 }
 
@@ -70,6 +74,7 @@ export interface Sphere {
   radius: number;
   color: vec3;
   emittance: number;
+  materialType: MaterialType;
 }
 
 /** Factory function to create a sphere primitive. */
@@ -77,6 +82,7 @@ export function Sphere(
   center: vec3,
   radius: number,
   color: vec3,
+  materialType = MaterialType.Diffuse,
   emittance = 0
 ): Sphere {
   return {
@@ -85,6 +91,7 @@ export function Sphere(
     radius,
     color,
     emittance,
+    materialType,
   };
 }
 

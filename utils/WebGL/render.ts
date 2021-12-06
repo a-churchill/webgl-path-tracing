@@ -176,6 +176,10 @@ export function setPlaneUniforms(
     shaderProgram.uniformLocations[`planes[${planeIndex}].emittance`],
     plane.emittance
   );
+  gl.uniform1i(
+    shaderProgram.uniformLocations[`planes[${planeIndex}].materialType`],
+    plane.materialType
+  );
   gl.uniform3fv(
     shaderProgram.uniformLocations[`planes[${planeIndex}].color`],
     plane.color
@@ -233,6 +237,10 @@ export function setSphereUniforms(
   gl.uniform1f(
     shaderProgram.uniformLocations[`spheres[${sphereIndex}].emittance`],
     sphere.emittance
+  );
+  gl.uniform1i(
+    shaderProgram.uniformLocations[`spheres[${sphereIndex}].materialType`],
+    sphere.materialType
   );
   gl.uniform3fv(
     shaderProgram.uniformLocations[`spheres[${sphereIndex}].color`],
