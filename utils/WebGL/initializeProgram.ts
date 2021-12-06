@@ -145,16 +145,41 @@ function initializeTextures(gl: WebGLRenderingContext): WebGLTexture[] {
   if (randomNoiseTexture === null) {
     throw new WebGLError("Could not create random noise texture");
   }
+
+  // initialize to manual random noise, to avoid weird artifacts on load
+  const randomNumbers = new Array(128 * 128)
+    .fill(0)
+    .flatMap(() => [
+      Math.floor(Math.random() * 256),
+      Math.floor(Math.random() * 256),
+      Math.floor(Math.random() * 256),
+      255,
+    ]);
+  const fakeImage = new Uint8Array(randomNumbers);
+  gl.bindTexture(gl.TEXTURE_2D, randomNoiseTexture);
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.RGBA,
+    128,
+    128,
+    0,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    fakeImage
+  );
+
+  // turn off mips and set wrapping to clamp to edge
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
   const image = new Image();
 
   // bind image to texture when it loads
   image.addEventListener("load", () => {
     gl.bindTexture(gl.TEXTURE_2D, randomNoiseTexture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-    // turn off mips and set wrapping to clamp to edge
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   });
 
   // start image loading

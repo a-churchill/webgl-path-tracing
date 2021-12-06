@@ -1,5 +1,10 @@
 import { vec3 } from "gl-matrix";
 
+export enum MaterialType {
+  Diffuse = 0,
+  Reflective = 1,
+}
+
 export enum PrimitiveType {
   PointLight = "point_light",
   Plane = "plane",
