@@ -3,6 +3,11 @@ import { Primitive } from "./Primitive";
 import { WebGLLocations } from "./WebGLLocations";
 import { WebGLProgramMetadata } from "./WebGLProgramMetadata";
 
+export interface ProgramOptions {
+  directIllumination: boolean;
+  globalIllumination: boolean;
+}
+
 /**
  * `Program` is the JS-side representation of our program, holding context about scene
  * (e.g. primitives and camera) and WebGL program.
@@ -15,6 +20,8 @@ interface GenericProgram<
   camera: Camera;
 
   gl: WebGLRenderingContext;
+
+  options: ProgramOptions;
 
   /** Primitives in the scene. */
   primitives: Primitive[];
@@ -54,6 +61,7 @@ type OtherUniformNames =
   | "prevFrame"
   | "randomNoise"
   | "renderCount"
+  | "renderMode"
   | "seed"
   | "seed2";
 
@@ -68,6 +76,7 @@ export const PROGRAM_UNIFORMS: (
   "prevFrame",
   "randomNoise",
   "renderCount",
+  "renderMode",
   "seed",
   "seed2",
 

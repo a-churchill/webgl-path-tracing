@@ -1,3 +1,5 @@
+#version 300 es
+
 precision mediump float;
 
 // CONSTANTS
@@ -19,7 +21,7 @@ const int DIFFUSE_MATERIAL_TYPE = 0;
 const int REFLECTIVE_MATERIAL_TYPE = 1;
 const int REFRACTIVE_MATERIAL_TYPE = 2;
 
-const float IMAGE_SIZE = 720.0;
+const float IMAGE_SIZE = 400.0;
 const float PI = 3.14159;
 
 // TYPES
@@ -101,8 +103,13 @@ uniform int renderCount;
 // this is random noise, provided from a PNG
 uniform sampler2D randomNoise;
 
+// true if we should render global illumination, false otherwise
+uniform int renderMode;
+
 // this is the xy position of the current point, in clip space coordinates.
-varying vec2 position;
+in vec2 position;
+
+out vec4 outputColor;
 
 // HELPER FUNCTIONS
 
@@ -113,7 +120,7 @@ float rand1(vec3 inVec, float seed) {
   pos3 += dot(pos3, pos3.yzx + 33.33);
   vec2 pos = fract((pos3.xx + pos3.yz) * pos3.zy);
 
-  return texture2D(randomNoise, pos).x * 2.0 - 1.0;
+  return texture(randomNoise, pos).x * 2.0 - 1.0;
 }
 
 // gets a random normalized vector from an input vector.
@@ -123,7 +130,7 @@ vec3 rand(vec3 inVec) {
   pos3 += dot(pos3, pos3.yzx + 33.33);
   vec2 pos = fract((pos3.xx + pos3.yz) * pos3.zy);
 
-  return normalize(texture2D(randomNoise, pos).xyz * 2.0 - vec3(1.0));
+  return normalize(texture(randomNoise, pos).xyz * 2.0 - vec3(1.0));
 }
 
 // Gets the position of the given ray at the given time, in world space
@@ -478,15 +485,26 @@ vec3 tracePath(Ray ray) {
   if(hit.time >= MAX_TIME) {
     return vec3(0.0);
   }
-  // return getColorFromLights(ray, hit, true);
-  // return getColorFromGlobalIllumination(ray, hit);
-  return getColorFromLights(ray, hit, true) + getColorFromGlobalIllumination(ray, hit);
+
+  if(renderMode == 3) {
+    return getColorFromLights(ray, hit, true) + getColorFromGlobalIllumination(ray, hit);
+  }
+
+  if(renderMode == 2) {
+    return getColorFromGlobalIllumination(ray, hit);
+  }
+
+  if(renderMode == 1) {
+    return getColorFromLights(ray, hit, true);
+  }
+
+  return vec3(0.0);
 }
 
 // MAIN FUNCTION
 
 void main() {
   vec2 uvPosition = position * 0.5 + vec2(0.5); // [-1, 1] x [-1, 1] -> [0, 1] x [0, 1]
-  vec4 prevFramePixel = texture2D(prevFrame, uvPosition);
-  gl_FragColor = (float(renderCount - 1) * prevFramePixel + vec4(tracePath(generateRay(position)), 1.0)) / float(renderCount);
+  vec4 prevFramePixel = texture(prevFrame, uvPosition);
+  outputColor = (float(renderCount - 1) * prevFramePixel + vec4(tracePath(generateRay(position)), 1.0)) / float(renderCount);
 }

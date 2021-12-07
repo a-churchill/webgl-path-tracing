@@ -1,6 +1,6 @@
 import { vec3 } from "gl-matrix";
 
-export const IMAGE_SIZE = 720; // px
+export const IMAGE_SIZE = 400; // px
 export const CAMERA_FOV = Math.PI / 4;
 export const CAMERA_DISTANCE = 1 + 1 / Math.tan(CAMERA_FOV / 2);
 export const CANVAS_ID = "webgl-canvas";

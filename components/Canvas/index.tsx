@@ -8,11 +8,15 @@ import { render } from "utils/WebGL/render";
 
 import styles from "./Canvas.module.css";
 
+interface Props {
+  program: Program | undefined;
+  setProgram: (program: Program | undefined) => void;
+}
+
 /**
  * Creates a WebGL canvas and manages WebGL objects.
  */
-export default function Canvas() {
-  const [program, setProgram] = useState<Program | undefined>();
+export default function Canvas({ program, setProgram }: Props) {
   const [error, setError] = useState<string | undefined>();
   const renderCountRef = useRef(1);
 
@@ -30,7 +34,7 @@ export default function Canvas() {
   // initialize program
   useEffect(() => {
     setProgram(initializeProgram(onErrorCallback));
-  }, [onErrorCallback]);
+  }, [onErrorCallback, setProgram]);
 
   // set up main render loop
   useEffect(() => {

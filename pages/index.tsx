@@ -1,11 +1,15 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import { useState } from "react";
+import { Program } from "types/Program";
 
 import Canvas from "../components/Canvas";
 import styles from "../styles/Home.module.css";
 
 const Home: NextPage = () => {
+  const [program, setProgram] = useState<Program | undefined>();
+
   return (
     <div className={styles.container}>
       <Head>
@@ -24,7 +28,7 @@ const Home: NextPage = () => {
           Path tracing algorithm for global illumination implemented in WebGL.
         </p>
 
-        <Canvas />
+        <Canvas program={program} setProgram={setProgram} />
       </main>
 
       <footer className={styles.footer}>

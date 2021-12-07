@@ -1,8 +1,10 @@
+#version 300 es
+
 precision mediump float;
 
-attribute vec4 vertexPosition;
+in vec4 vertexPosition;
 
-varying vec2 position;
+out vec2 position;
 
 void main() {
   position = vertexPosition.xy;

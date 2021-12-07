@@ -1,0 +1,21 @@
+.toggle {
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  align-items: center;
+
+  margin-left: 0.5rem;
+}
+
+.label {
+  margin-right: 0.3rem;
+  margin-bottom: 1px;
+
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.description {
+  font-size: 0.8rem;
+  padding-left: 0.3rem;
+  grid-column: 1 / 3;
+}

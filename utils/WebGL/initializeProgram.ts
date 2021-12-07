@@ -7,6 +7,7 @@ import {
   Program,
   PROGRAM_ATTRIBUTES,
   PROGRAM_UNIFORMS,
+  ProgramOptions,
   Uniforms,
 } from "types/Program";
 import { CANVAS_ID } from "utils/constants";
@@ -250,7 +251,7 @@ export default function initializeProgram(
     `#${CANVAS_ID}`
   ) as HTMLCanvasElement | null;
   // Initialize the GL context
-  const gl = canvas?.getContext("webgl");
+  const gl = canvas?.getContext("webgl2");
 
   // Only continue if WebGL is available and working
   if (gl === undefined || gl === null) {
@@ -266,10 +267,15 @@ export default function initializeProgram(
     const shaderProgram = initializeShaderProgram(gl, vsSource, fsSource);
     initializeVertices(gl, shaderProgram);
     const textures = initializeTextures(gl);
+    const options: ProgramOptions = {
+      directIllumination: true,
+      globalIllumination: true,
+    };
 
     return {
       camera: DEFAULT_CAMERA,
       gl,
+      options,
       primitives: CORNELL_BOX_AREA_LIGHT,
       shaderProgram,
       textures,

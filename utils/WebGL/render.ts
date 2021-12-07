@@ -17,7 +17,7 @@ import { unreachable, WebGLError } from "utils/errors";
  * @param program current program state
  */
 function copyProgramStateToBuffers(
-  { camera, gl, primitives, shaderProgram, textures }: Program,
+  { camera, gl, options, primitives, shaderProgram, textures }: Program,
   renderCount: number
 ): void {
   gl.useProgram(shaderProgram.program);
@@ -26,6 +26,16 @@ function copyProgramStateToBuffers(
   gl.uniform1i(shaderProgram.uniformLocations.renderCount, renderCount);
   gl.uniform1f(shaderProgram.uniformLocations.seed, Math.random());
   gl.uniform1f(shaderProgram.uniformLocations.seed2, Math.random());
+  gl.uniform1i(
+    shaderProgram.uniformLocations.renderMode,
+    options.directIllumination && options.globalIllumination
+      ? 3
+      : options.globalIllumination
+      ? 2
+      : options.directIllumination
+      ? 1
+      : 0
+  );
 
   // set up random noise texture
   gl.activeTexture(gl.TEXTURE0);
@@ -122,6 +132,7 @@ function saveCurrentFrameToTexture(program: Program): void {
   gl.activeTexture(gl.TEXTURE1);
   gl.bindTexture(gl.TEXTURE_2D, program.textures[PREV_FRAME_TEXTURE_INDEX]);
 
+  console.time("readPixels");
   gl.readPixels(
     0,
     0,
@@ -131,6 +142,7 @@ function saveCurrentFrameToTexture(program: Program): void {
     gl.UNSIGNED_BYTE,
     currentPixels
   );
+  console.timeEnd("readPixels");
   gl.texImage2D(
     gl.TEXTURE_2D,
     0,
@@ -255,9 +267,11 @@ export function render(
 ): void {
   const { gl } = program;
   try {
+    console.time("render");
     copyProgramStateToBuffers(program, renderCount);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     saveCurrentFrameToTexture(program);
+    console.timeEnd("render");
   } catch (e) {
     if (e instanceof WebGLError) {
       onError(e.message);
