@@ -5,7 +5,7 @@ export const CAMERA_FOV = Math.PI / 4;
 export const CAMERA_DISTANCE = 1 + 1 / Math.tan(CAMERA_FOV / 2);
 export const CANVAS_ID = "webgl-canvas";
 export const MAX_LIGHTS = 5;
-export const MAX_PLANES = 10;
+export const MAX_PLANES = 8;
 export const MAX_SPHERES = 5;
 
 // colors

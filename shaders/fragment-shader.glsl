@@ -4,7 +4,7 @@ precision mediump float;
 
 // CONSTANTS
 const int MAX_LIGHTS = 5;
-const int MAX_PLANES = 10;
+const int MAX_PLANES = 8;
 const int MAX_SPHERES = 5;
 
 const int MAX_BOUNCES = 8;
