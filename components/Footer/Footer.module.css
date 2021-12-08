@@ -1,0 +1,24 @@
+.footer {
+  /* Negate padding of main container */
+  margin: 0 -2rem -6rem;
+
+  display: flex;
+  flex: 1;
+  padding: 2rem 0;
+  border-top: 1px solid #eaeaea;
+  background-color: #eaeaea;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 0.4rem;
+}
+
+.logo {
+  padding: 0 0.5rem;
+  border-radius: 100%;
+}

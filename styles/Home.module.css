@@ -1,48 +1,21 @@
 .main {
-  min-height: 100vh;
-  padding: 6rem 2rem;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
-.title {
-  margin: 0;
-  line-height: 1.15;
-  font-size: 3rem;
+.content {
+  width: 50vw;
 }
 
-.title,
-.description {
-  text-align: center;
-}
+.canvas {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 50vw;
 
-.description {
-  margin: 2.5rem 0;
-  line-height: 1.5;
-  font-size: 1.2rem;
-}
-
-.footer {
-  display: flex;
-  flex: 1;
-  padding: 2rem 0;
-  border-top: 1px solid #eaeaea;
-  background-color: #eaeaea;
-  justify-content: center;
-  align-items: center;
-}
-
-.footer a {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-left: 0.4rem;
-}
 
-.logo {
-  padding: 0 0.5rem;
-  border-radius: 100%;
+  background: white;
 }

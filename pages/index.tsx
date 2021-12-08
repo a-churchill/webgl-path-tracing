@@ -1,6 +1,7 @@
+import Content from "components/Content";
+import Footer from "components/Footer";
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
 import { useState } from "react";
 import { Program } from "types/Program";
 
@@ -22,31 +23,15 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>Path Tracing</h1>
+        <div className={styles.content}>
+          <Content program={program} setProgram={setProgram} />
+          <Footer />
+        </div>
 
-        <p className={styles.description}>
-          Path tracing algorithm for global illumination implemented in WebGL.
-        </p>
-
-        <Canvas program={program} setProgram={setProgram} />
+        <div className={styles.canvas}>
+          <Canvas program={program} setProgram={setProgram} />
+        </div>
       </main>
-
-      <footer className={styles.footer}>
-        Created by{" "}
-        <a
-          href="https://achurchill.io/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            className={styles.logo}
-            src="/andrew-churchill.jpg"
-            alt="Picture of author"
-            width={24}
-            height={24}
-          />
-        </a>
-      </footer>
     </div>
   );
 };

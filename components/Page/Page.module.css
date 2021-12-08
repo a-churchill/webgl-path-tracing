@@ -1,0 +1,10 @@
+.page {
+  height: 100vh;
+  position: relative;
+
+  padding: 2em 6em;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

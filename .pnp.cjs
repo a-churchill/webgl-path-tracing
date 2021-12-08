@@ -40,6 +40,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/react", "npm:17.0.36"],
             ["@typescript-eslint/eslint-plugin", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:5.5.0"],
             ["@typescript-eslint/parser", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:5.5.0"],
+            ["classnames", "npm:2.3.1"],
             ["eslint", "npm:7.32.0"],
             ["eslint-config-next", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:12.0.4"],
             ["eslint-plugin-simple-import-sort", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:7.0.0"],
@@ -1938,6 +1939,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/classnames-npm-2.2.6-98e9901cf4-09a4fda780.zip/node_modules/classnames/",
           "packageDependencies": [
             ["classnames", "npm:2.2.6"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:2.3.1", {
+          "packageLocation": "./.yarn/cache/classnames-npm-2.3.1-f2ae0a8d3c-14db8889d5.zip/node_modules/classnames/",
+          "packageDependencies": [
+            ["classnames", "npm:2.3.1"]
           ],
           "linkType": "HARD",
         }]
@@ -6251,6 +6259,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/react", "npm:17.0.36"],
             ["@typescript-eslint/eslint-plugin", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:5.5.0"],
             ["@typescript-eslint/parser", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:5.5.0"],
+            ["classnames", "npm:2.3.1"],
             ["eslint", "npm:7.32.0"],
             ["eslint-config-next", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:12.0.4"],
             ["eslint-plugin-simple-import-sort", "virtual:80229c5435ea2c0460372fd380d14da04fa423451e4901e6cc4d330f5ae3c0f68d06d913cf48239aa080ffbe739e64d73dfb6df3c9482594e67396442e4533b9#npm:7.0.0"],

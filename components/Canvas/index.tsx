@@ -1,4 +1,3 @@
-import ProgramControls from "components/ProgramControls";
 import useMouseCameraControl from "hooks/useMouseCameraControl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Program } from "types/Program";
@@ -77,7 +76,6 @@ export default function Canvas({ program, setProgram }: Props) {
         width={IMAGE_SIZE}
         height={IMAGE_SIZE}
       />
-      <ProgramControls program={program} updateProgram={setProgram} />
       {error !== undefined && <div className={styles.error}>{error}</div>}
     </>
   );

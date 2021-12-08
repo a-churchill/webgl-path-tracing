@@ -38,43 +38,48 @@ export default function ProgramControls({ program, updateProgram }: Props) {
 
   return (
     <div className={styles.controls}>
-      <button
-        className={styles.primary}
-        onClick={() => setPrimitives(CORNELL_BOX_AREA_LIGHT)}
-      >
-        One Light
-      </button>
-      <button
-        className={styles.primary}
-        onClick={() => setPrimitives(CORNELL_BOX_THREE_POINT_LIGHTS)}
-      >
-        Three Lights
-      </button>
-      <button onClick={resetProgram}>Reset</button>
-      <Toggle
-        label={"Global Illumination"}
-        description={"Sample global light at every pixel"}
-        isChecked={program?.options.globalIllumination}
-        onChange={() => {
-          if (program === undefined) return;
-          setOptions({
-            ...program.options,
-            globalIllumination: !program.options.globalIllumination,
-          });
-        }}
-      />
-      <Toggle
-        label={"Direct Illumination"}
-        description={"Trace rays directly from camera"}
-        isChecked={program?.options.directIllumination}
-        onChange={() => {
-          if (program === undefined) return;
-          setOptions({
-            ...program.options,
-            directIllumination: !program.options.directIllumination,
-          });
-        }}
-      />
+      <div className={styles.row}>
+        <button
+          className={styles.primary}
+          onClick={() => setPrimitives(CORNELL_BOX_AREA_LIGHT)}
+        >
+          One Light
+        </button>
+        <button
+          className={styles.primary}
+          onClick={() => setPrimitives(CORNELL_BOX_THREE_POINT_LIGHTS)}
+        >
+          Three Lights
+        </button>
+        <button onClick={resetProgram}>Reset</button>
+      </div>
+
+      <div className={styles.row}>
+        <Toggle
+          label={"Global Illumination"}
+          description={"Sample global light at every pixel"}
+          isChecked={program?.options.globalIllumination}
+          onChange={() => {
+            if (program === undefined) return;
+            setOptions({
+              ...program.options,
+              globalIllumination: !program.options.globalIllumination,
+            });
+          }}
+        />
+        <Toggle
+          label={"Direct Illumination"}
+          description={"Trace rays directly from camera"}
+          isChecked={program?.options.directIllumination}
+          onChange={() => {
+            if (program === undefined) return;
+            setOptions({
+              ...program.options,
+              directIllumination: !program.options.directIllumination,
+            });
+          }}
+        />
+      </div>
     </div>
   );
 }
