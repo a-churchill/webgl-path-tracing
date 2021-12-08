@@ -40,6 +40,10 @@ export const LIGHTS_AREA = [
   ), // light on ceiling
 ];
 
+export const LIGHTS_ONE_POINT = [
+  PointLight(vec3.fromValues(0.01, 0.01, 0.01), WHITE, 1), // light in center
+];
+
 export const LIGHTS_THREE_POINT = [
   PointLight(vec3.fromValues(0.5, 0.5, 0.5), WHITE, 0.6), // light in corner
   PointLight(vec3.fromValues(0, 0, -0.3), WHITE, 0.3), // halo light from behind
@@ -108,8 +112,24 @@ export const CORNELL_BOX_AREA_LIGHT = [
   ...LIGHTS_AREA,
 ];
 
+export const CORNELL_BOX_AREA_LIGHT_REFLECTIVE = [
+  ...WALLS_REFLECTIVE,
+  ...BALLS_REFLECTIVE,
+  ...LIGHTS_AREA,
+];
+
+export const CORNELL_BOX_AREA_LIGHT_EMPTY = [...WALLS_STANDARD, ...LIGHTS_AREA];
+
+export const CORNELL_BOX_EMPTY = [...WALLS_COLORFUL, ...LIGHTS_ONE_POINT];
+
 export const CORNELL_BOX_THREE_POINT_LIGHTS = [
   ...WALLS_COLORFUL,
+  ...BALLS_COLORFUL,
+  ...LIGHTS_THREE_POINT,
+];
+
+export const CORNELL_BOX_THREE_POINT_LIGHTS_REFLECTIVE = [
+  ...WALLS_REFLECTIVE,
   ...BALLS_COLORFUL,
   ...LIGHTS_THREE_POINT,
 ];

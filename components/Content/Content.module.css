@@ -1,5 +1,13 @@
-.content {
-  min-height: 100vh;
+@keyframes floating {
+  0% {
+    transform: translate(0px, 0px);
+  }
+  50% {
+    transform: translate(0px, 3px);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
 }
 
 .title {
@@ -8,18 +16,59 @@
   font-size: 3rem;
 }
 
-.title,
-.description {
-  text-align: right;
-}
-
 .description {
   margin: 2.5rem 0;
   line-height: 1.5;
   font-size: 1.2rem;
+  font-weight: 400;
 }
 
 .primaryPage {
   background-color: black;
   color: white;
+}
+
+.scrollIndicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 0;
+  right: 0;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+
+  text-align: center;
+  color: gray;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.primaryPage .scrollIndicator {
+  color: lightgray;
+}
+
+.scrollIndicator:hover {
+  box-shadow: none;
+}
+
+.scrollIndicator .arrow {
+  transition: all 0.2s ease-in-out 0s;
+  animation: 3s infinite ease-in-out floating;
+}
+
+.content p {
+  max-width: 32em;
+}
+
+.content li {
+  text-align: left;
+  width: 25em;
+}
+
+.content a {
+  color: rgb(82, 144, 238);
+}
+
+.centerPage {
+  align-items: center !important;
+  text-align: unset !important;
 }

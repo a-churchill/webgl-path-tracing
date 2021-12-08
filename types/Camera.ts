@@ -1,5 +1,4 @@
 import { mat4, vec3 } from "gl-matrix";
-import { CAMERA_DISTANCE, CAMERA_FOV } from "utils/constants";
 
 export interface Camera {
   /** Camera location */
@@ -28,13 +27,6 @@ export function Camera(
     up: vec3.normalize(vec3.create(), up),
   };
 }
-
-export const DEFAULT_CAMERA = Camera(
-  vec3.fromValues(0, 0, CAMERA_DISTANCE),
-  vec3.fromValues(0, 0, -1),
-  CAMERA_FOV,
-  vec3.fromValues(0, 1, 0)
-);
 
 /**
  * Applies transformation to camera and returns a new camera. Does not mutate the passed

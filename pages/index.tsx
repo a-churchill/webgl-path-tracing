@@ -14,10 +14,10 @@ const Home: NextPage = () => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Path Tracing in WebGL</title>
+        <title>Path Tracing</title>
         <meta
           name="description"
-          content="Path tracing algorithm for global illumination implemented in WebGL"
+          content="Path tracing algorithm for global illumination, implemented in WebGL"
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>

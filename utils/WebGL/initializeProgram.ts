@@ -1,18 +1,16 @@
 import fsSource from "shaders/fragment-shader.glsl";
 import vsSource from "shaders/vertex-shader.glsl";
 
-import { DEFAULT_CAMERA } from "types/Camera";
 import {
   Attributes,
   Program,
   PROGRAM_ATTRIBUTES,
   PROGRAM_UNIFORMS,
-  ProgramOptions,
   Uniforms,
 } from "types/Program";
 import { CANVAS_ID } from "utils/constants";
+import { DEFAULT_PROGRAM } from "utils/defaults";
 import { WebGLError } from "utils/errors";
-import { CORNELL_BOX_AREA_LIGHT } from "utils/presetPrograms";
 
 /**
  * Initializes the buffers used to communicate with the WebGL program.
@@ -267,16 +265,10 @@ export default function initializeProgram(
     const shaderProgram = initializeShaderProgram(gl, vsSource, fsSource);
     initializeVertices(gl, shaderProgram);
     const textures = initializeTextures(gl);
-    const options: ProgramOptions = {
-      directIllumination: true,
-      globalIllumination: true,
-    };
 
     return {
-      camera: DEFAULT_CAMERA,
+      ...DEFAULT_PROGRAM,
       gl,
-      options,
-      primitives: CORNELL_BOX_AREA_LIGHT,
       shaderProgram,
       textures,
     };

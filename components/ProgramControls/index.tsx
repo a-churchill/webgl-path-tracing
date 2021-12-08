@@ -1,10 +1,10 @@
 import Toggle from "components/Toggle";
 import { useCallback } from "react";
-import { DEFAULT_CAMERA } from "types/Camera";
 import { Primitive } from "types/Primitive";
 import { Program, ProgramOptions } from "types/Program";
 import {
   CORNELL_BOX_AREA_LIGHT,
+  CORNELL_BOX_AREA_LIGHT_REFLECTIVE,
   CORNELL_BOX_THREE_POINT_LIGHTS,
 } from "utils/presetPrograms";
 
@@ -12,29 +12,26 @@ import styles from "./ProgramControls.module.css";
 
 interface Props {
   program: Program | undefined;
-  updateProgram: (program: Program) => void;
+  setProgram: React.Dispatch<React.SetStateAction<Program | undefined>>;
 }
 
-export default function ProgramControls({ program, updateProgram }: Props) {
+export default function ProgramControls({ program, setProgram }: Props) {
   const setOptions = useCallback(
     (options: ProgramOptions) => {
-      if (program === undefined) return;
-      updateProgram({ ...program, options });
+      setProgram((program) =>
+        program === undefined ? program : { ...program, options }
+      );
     },
-    [program, updateProgram]
+    [setProgram]
   );
   const setPrimitives = useCallback(
     (primitives: Primitive[]) => {
-      if (program === undefined) return;
-      updateProgram({ ...program, primitives });
+      setProgram((program) =>
+        program === undefined ? program : { ...program, primitives }
+      );
     },
-    [program, updateProgram]
+    [setProgram]
   );
-
-  const resetProgram = useCallback(() => {
-    if (program === undefined) return;
-    updateProgram({ ...program, camera: DEFAULT_CAMERA });
-  }, [program, updateProgram]);
 
   return (
     <div className={styles.controls}>
@@ -47,11 +44,16 @@ export default function ProgramControls({ program, updateProgram }: Props) {
         </button>
         <button
           className={styles.primary}
+          onClick={() => setPrimitives(CORNELL_BOX_AREA_LIGHT_REFLECTIVE)}
+        >
+          Reflective Walls
+        </button>
+        <button
+          className={styles.primary}
           onClick={() => setPrimitives(CORNELL_BOX_THREE_POINT_LIGHTS)}
         >
           Three Lights
         </button>
-        <button onClick={resetProgram}>Reset</button>
       </div>
 
       <div className={styles.row}>

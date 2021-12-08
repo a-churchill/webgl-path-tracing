@@ -132,7 +132,7 @@ function saveCurrentFrameToTexture(program: Program): void {
   gl.activeTexture(gl.TEXTURE1);
   gl.bindTexture(gl.TEXTURE_2D, program.textures[PREV_FRAME_TEXTURE_INDEX]);
 
-  console.time("readPixels");
+  // console.time("readPixels");
   gl.readPixels(
     0,
     0,
@@ -142,7 +142,7 @@ function saveCurrentFrameToTexture(program: Program): void {
     gl.UNSIGNED_BYTE,
     currentPixels
   );
-  console.timeEnd("readPixels");
+  // console.timeEnd("readPixels");
   gl.texImage2D(
     gl.TEXTURE_2D,
     0,
@@ -267,11 +267,11 @@ export function render(
 ): void {
   const { gl } = program;
   try {
-    console.time("render");
+    // console.time("render");
     copyProgramStateToBuffers(program, renderCount);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     saveCurrentFrameToTexture(program);
-    console.timeEnd("render");
+    // console.timeEnd("render");
   } catch (e) {
     if (e instanceof WebGLError) {
       onError(e.message);

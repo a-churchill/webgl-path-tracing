@@ -1,6 +1,11 @@
 .footer {
   /* Negate padding of main container */
-  margin: 0 -2rem -6rem;
+  /* margin: 0 -2rem -6rem; */
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1;
 
   display: flex;
   flex: 1;

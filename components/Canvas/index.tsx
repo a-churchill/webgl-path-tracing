@@ -2,6 +2,7 @@ import useMouseCameraControl from "hooks/useMouseCameraControl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Program } from "types/Program";
 import { CANVAS_ID, IMAGE_SIZE } from "utils/constants";
+import { DEFAULT_CAMERA } from "utils/defaults";
 import initializeProgram from "utils/WebGL/initializeProgram";
 import { render } from "utils/WebGL/render";
 
@@ -9,7 +10,7 @@ import styles from "./Canvas.module.css";
 
 interface Props {
   program: Program | undefined;
-  setProgram: (program: Program | undefined) => void;
+  setProgram: React.Dispatch<React.SetStateAction<Program | undefined>>;
 }
 
 /**
@@ -76,6 +77,17 @@ export default function Canvas({ program, setProgram }: Props) {
         width={IMAGE_SIZE}
         height={IMAGE_SIZE}
       />
+      <button
+        onClick={() =>
+          setProgram((program) =>
+            program === undefined
+              ? undefined
+              : { ...program, camera: DEFAULT_CAMERA }
+          )
+        }
+      >
+        Reset
+      </button>
       {error !== undefined && <div className={styles.error}>{error}</div>}
     </>
   );

@@ -14,8 +14,15 @@
   width: 50vw;
 
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 
   background: white;
+
+  padding: 1rem;
+}
+
+.canvas button {
+  margin-top: 1rem;
 }
