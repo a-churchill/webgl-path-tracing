@@ -13,6 +13,17 @@ export default function ImplementationPage() {
         curious about how this site works.
       </p>
       <p>
+        This project was entirely inspired by{" "}
+        <a
+          href="http://madebyevan.com/webgl-path-tracing/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Evan Wallace&apos;s similar project
+        </a>
+        . Thanks to Evan for the excellent idea!
+      </p>
+      <p>
         This project is implemented in WebGL, which is wrapper around OpenGL,
         which is an interface that allows you to write code (called
         &ldquo;shaders&rdquo;) that is run on a GPU. OpenGL is written for{" "}
@@ -39,18 +50,9 @@ export default function ImplementationPage() {
       </p>
 
       <p>
-        All the communication between the browser and the shader is done by
-        setting uniforms, which are global variables that can be referenced in
-        the vertex shader.
-      </p>
-
-      <p>
         The rest of the site is built using React and Next.js, and hosted on
-        Vercel.
-      </p>
-
-      <p>
-        If any of this is interesting to you, I encourage you to check out the{" "}
+        Vercel. If any of this is interesting to you, I encourage you to check
+        out the{" "}
         <a
           href="https://github.com/a-churchill/webgl-path-tracing"
           target="_blank"
